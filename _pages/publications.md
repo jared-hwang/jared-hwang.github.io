@@ -10,7 +10,18 @@ author_profile: true
 {% endif %}
 
 {% include base_path %}
+<!-- 
 
 {% for post in site.publications reversed %}
+  {% include archive-single.html %}
+{% endfor %} -->
+
+{% capture written_year %}'None'{% endcapture %}
+{% for post in site.publications reversed %}
+  {% capture year %}{{ post.date | date: '%Y' }}{% endcapture %}
+  {% if year != written_year %}
+## {{ year }}
+    {% capture written_year %}{{ year }}{% endcapture %}
+  {% endif %}
   {% include archive-single.html %}
 {% endfor %}
