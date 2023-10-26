@@ -27,5 +27,5 @@ main:
   - title: "CV"
     url: /cv_file/hwang_CV.pdf
     
-  - title: "Guide"
-    url: /markdown/
+  # - title: "Guide"
+  #   url: /markdown/
