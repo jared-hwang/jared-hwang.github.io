@@ -14,16 +14,16 @@ I'm looking to join a research lab as a PhD student in 2024!
 
 My research interests lie in data management, applied ML, and urban informatics. Specifically:
   * 📝 Tools for **managing raw data**
-      * How can we bridge the gap between collecting data and using?
+      * How can we bridge the gap between collecting data and using it?
   * 💡 Using ML to **extract insight**
       * How can ML/computation help us extract more value out of our data?
-      * How can ML lead us to results that would have taken much longer to reach without ML?
+      * How can ML lead us to results that would have taken longer to reach without ML?
   * 🚞 Building **better cities**
       * City design impacts our lives in fundamental ways we may not realize: accessibility, sustainability, equity, etc.
       * How can we use ML/computational methods to extract insight about our cities and how humans live?
       * How can this insight guide us in designing better cities?
 
-Check out my [Research](/research/) and [CV](/cv_file/hwang_CV.pdf) to see how I got to where I am now.
+Check out my [Research](/research/) and [CV](/cv_file/hwang_CV.pdf) to see how I my interests got to where they are now.
 
 Recent news
 ======
