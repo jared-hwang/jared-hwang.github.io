@@ -18,7 +18,7 @@ Liquid argon time projection chambers (LArTPCs) are a type of particle detector 
 
 **Project 1: Attempting centroid based instance segmentation on LArTPC images**
 
-To separate the different elements of a neutrino interaction (trunk, shower, etc.), we attempt to use a novel centroid based loss-function to perform instance segmentation. See the loss function paper (here)[https://arxiv.org/abs/1906.11109].
+To separate the different elements of a neutrino interaction (trunk, shower, etc.), we attempt to use a novel centroid based loss-function to perform instance segmentation. See the loss function paper [here](https://arxiv.org/abs/1906.1110).
 
 | ![instanceseg.png](/images/research_images/lartpc/instanceseg.png) | 
 |:--:| 
