@@ -39,4 +39,4 @@ Other fun things
 * I recently got into photography! I'm not good. [portfolio pending](https://jared-hwang.github.io/)
 
 
-<sub>Page updated October 2023.</sub>
+<sub>Page updated November 2023.</sub>
