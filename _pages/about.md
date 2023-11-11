@@ -23,7 +23,7 @@ My research interests lie in data management, applied ML, and urban informatics.
       * How can we use ML/computational methods to extract insight about our cities and how humans live?
       * How can this insight guide us in designing better cities?
 
-Check out my [Research](/research/) and [CV](/cv_file/hwang_CV.pdf) to see how I my interests got to where they are now.
+Check out my [Research](/research/) and [CV](/cv_file/hwang_CV.pdf) to see how my interests got to where they are now.
 
 Recent news
 ======
