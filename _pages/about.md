@@ -34,7 +34,7 @@ Our paper was accepted to NeuRIPS 2023! Check it out [here](/publications/)
 Other fun things
 ======
 * I've lived in NJ, Shanghai, Boston, Kyoto, Los Angeles, Tokyo, and now Seattle! 
-* I volunteered at a 子ども食堂　(children's food kitchen) for several months in Kyoto, serving food to the community. Check out the [crew](/images/kodomo.JPG)! [Web](https://www.facebook.com/higashikujochildsdiner/) 
+* I volunteered at a 子ども食堂 (children's food kitchen) for several months in Kyoto, serving food to the community. Check out the [crew](/images/kodomo.JPG)! [Web](https://www.facebook.com/higashikujochildsdiner/) 
 * Here's a [very old video of me demonstrating gravity and relativity](https://youtu.be/M-kAljSDzYI).
 * I've completed a Pokémon [living dex](https://bulbapedia.bulbagarden.net/wiki/Living_Pok%C3%A9dex).
 * I recently got into photography! I'm not good. [portfolio pending](https://jared-hwang.github.io/)
