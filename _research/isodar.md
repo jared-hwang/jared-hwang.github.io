@@ -17,7 +17,7 @@ The IsoDAR experiment searches for sterile neutrino oscillations and non-standar
 
 To predict the behavior of the H<sub>2</sub>+ through the RFQ, we simulate it. 
 
-| ![rfq.gif](/images/research_images/isodar/rfq.gif) | 
+| ![rfq.gif](/images/research_images/isodar/rfq.gif "Video of an RFQ simulation. Two animated graphs of thousands of particles shaped in a sine wave like shape. The two graphs are oscillating opposite each other") | 
 |:--:| 
 | *Video of an RFQ simulation* |
 

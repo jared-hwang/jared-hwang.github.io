@@ -19,7 +19,7 @@ In simulation-based inference, a simulator is described by a joint distribution 
 
 We can attempt to learn the relationship between the output and the input parameters, to make future predictions about the impact of the input parameters on the output of the simulation (without having to run the simulation).
 
-| ![traffic_sim.gif](/images/project_images/traffic_sim.gif) | 
+| ![traffic_sim.gif](/images/project_images/traffic_sim.gif "Animation of a traffic simulation UI. It shows an intersection with cars driving up, stopping, turning, etc. based on the traffic light.") |  
 |:--:| 
 | *Traffic Simulation run in the A/B Street UI* |
 
@@ -27,7 +27,7 @@ We use the open source software A/B Street for its straightforward API, and perf
 
 We find that shorter or longer interval times of traffic lights can lead to shorter or longer trip times overall on average, according to our learned relationship.
 
-| ![posterior.png](/images/project_thumbs/posterior.png) | 
+| ![posterior.png](/images/project_thumbs/posterior.png "Three graphs showing the posterior over the three traffic signal parameters. There are heatmaps also showing similar data, but over all the simulations run." ) | 
 |:--:| 
 | *Posterior over the three traffic signal parameters, conditioned on baseline travel duration; p(θ \| x<sub>o</sub>)* |
 

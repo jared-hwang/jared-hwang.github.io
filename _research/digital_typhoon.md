@@ -17,7 +17,7 @@ The Digital Typhoon Project aims to collect, standardize, and curate typhoon (hu
 
 With the dataset, the project hopes to reduce the burden of researchers to begin peforming ML on tropical cyclones without needing in depth meteorology and satellite remote sensing knowledge.
 
-| ![typhoon_overview.png](/images/research_images/digital_typhoon/typhoon_overview.png) | 
+| ![typhoon_overview.png](/images/research_images/digital_typhoon/typhoon_overview.png "Example photos of images on a 3D globe projecting to 2D.") | 
 |:--:| 
 | *An overview of the dataset and projection of globe images to 2D.* |
 
@@ -39,7 +39,7 @@ The result was a highly valuable dataset only accessible via the web UI, which m
 
 **pyphoon2**
 
-| ![typhoon_data_dir_structure.png](/images/research_images/digital_typhoon/typhoon_data_dir_structure.png) | 
+| ![typhoon_data_dir_structure.png](/images/research_images/digital_typhoon/typhoon_data_dir_structure.png "Displaying the file structure of the dataset. There is a metadata folder containing csv files for each typhoon, and an images folder containing subfolders containing images of each typhoon. Lastly there is a metadata.json file containing top level information like typhoon names.") | 
 |:--:| 
 | *An overview of the structure of the dataset* |
 

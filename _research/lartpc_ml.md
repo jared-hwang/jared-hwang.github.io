@@ -20,7 +20,7 @@ Liquid argon time projection chambers (LArTPCs) are a type of particle detector 
 
 To separate the different elements of a neutrino interaction (trunk, shower, etc.), we attempt to use a novel centroid based loss-function to perform instance segmentation. See the loss function paper [here](https://arxiv.org/abs/1906.1110).
 
-| ![instanceseg.png](/images/research_images/lartpc/instanceseg.png) | 
+| ![instanceseg.png](/images/research_images/lartpc/instanceseg.png "Showing the ground truth of the instance segmentation. A neutrino interaction is split into a trunk (the beginning of the path shaped like a thick line), and a shower (that thick line splitting off into several smaller lines)") | 
 |:--:| 
 | *The ground truth of instance segmentation in our project. Note the shower is missing from the highlight, a problem with the labeling upstream.* |
 
@@ -32,6 +32,6 @@ LArTPC detectors produce terabytes of data per second. Finding a way to make the
 
 By tiling LArTPC images into VQVAE-acceptable image sizes, and reconstructing decoded tiles, we achieved up to 80% reduction in file size compared to traditional JPEG compression. 
 
-| ![instanceseg.png](/images/research_images/lartpc/reconstructedtiles.png) | 
+| ![reconstructedtiles.png](/images/research_images/lartpc/reconstructedtiles.png "An example of the tiles compressed and reconstructed using the VQVAE. The top shows original images, the bottom shows reconstructed. They look largely the same, with slightly higher blurriness in the bottom. Much of the image is black deadspace (where there are no particles).") | 
 |:--:| 
 | *An example of tiles compressed and reconstructed using the VQVAE. Top is the original images, bottom is the reconstructed.* |
