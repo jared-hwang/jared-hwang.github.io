@@ -10,8 +10,6 @@ redirect_from:
 
 Hello! I'm Jared, currently a Software Engineer at Amazon in Seattle. I got my M.S. in CS at the University of Southern California, and before that my B.S. in Physics and CS at Tufts University.
 
-I'm looking to join a research lab as a PhD student in 2024!
-
 My research interests lie in data management, applied ML, and urban informatics. Specifically:
   * 📝 Tools for **managing raw data**
       * How can we bridge the gap between collecting data and using it?
@@ -40,4 +38,4 @@ Other fun things
 * I recently got into photography! I'm not good. [portfolio pending](https://jared-hwang.github.io/)
 
 
-<sub>Page updated November 2023.</sub>
+<sub>Page updated April 2024.</sub>
