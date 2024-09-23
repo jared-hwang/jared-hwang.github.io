@@ -8,7 +8,9 @@ redirect_from:
   - /about.html
 ---
 
-Hello! I'm Jared, currently a Software Engineer at Amazon in Seattle. I got my M.S. in CS at the University of Southern California, and before that my B.S. in Physics and CS at Tufts University.
+Hello! I'm Jared. I'm a first-year PhD student at the UW Paul G. Allen School. I am a part of the [Makeability Lab](https://makeabilitylab.cs.washington.edu/), advised by [Jon Froehlich](https://jonfroehlich.github.io/), working to make cities more sustainable, accessivle, and equitable.
+
+Previously, I worked as a Software Engineer at Amazon. I got my M.S. in CS at the University of Southern California, and before that my B.S. in Physics and CS at Tufts University.
 
 My research interests lie in data management, applied ML, and urban informatics. Specifically:
   * 📝 Tools for **managing raw data**
@@ -26,7 +28,9 @@ Check out my [Research](/research/) and [CV](/cv_file/hwang_CV.pdf) to see how m
 Recent news
 ======
 
-Our paper was accepted to NeuRIPS 2023! Check it out [here](/publications/)
+[09/2024] I start my PhD at UW!
+
+[12/2023] Our paper was accepted to NeuRIPS 2023! Check it out [here](/publications/)
 
 
 Other fun things
@@ -38,4 +42,4 @@ Other fun things
 * I recently got into photography! I'm not good. [portfolio pending](https://jared-hwang.github.io/)
 
 
-<sub>Page updated April 2024.</sub>
+<sub>Page updated September 2024.</sub>
