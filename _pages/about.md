@@ -8,7 +8,7 @@ redirect_from:
   - /about.html
 ---
 
-Hello! I'm Jared. I'm a first-year PhD student at the UW Paul G. Allen School. I am a part of the [Makeability Lab](https://makeabilitylab.cs.washington.edu/), advised by [Jon Froehlich](https://jonfroehlich.github.io/), working to make cities more sustainable, accessible, and equitable.
+Hello! I'm Jared. I'm a second-year PhD student at the UW Paul G. Allen School. I am a part of the [Makeability Lab](https://makeabilitylab.cs.washington.edu/), advised by [Jon Froehlich](https://jonfroehlich.github.io/), working to make cities more sustainable, accessible, and equitable.
 
 I got my M.S. in CS at the University of Southern California, and before that my B.S. in Physics and CS at Tufts University.
 
