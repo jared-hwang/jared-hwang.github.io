@@ -166,8 +166,8 @@ author_profile: true
 {% include base_path %}
 
 <div class="filter-toggle">
-  <button class="filter-button active" onclick="filterPublications('selected')">Selected Publications</button>
-  <button class="filter-button" onclick="filterPublications('all')">All Publications</button>
+  <button class="filter-button active" onclick="filterPublications('selected', this)">Selected Publications</button>
+  <button class="filter-button" onclick="filterPublications('all', this)">All Publications</button>
 </div>
 
 <div class="publications-list">
