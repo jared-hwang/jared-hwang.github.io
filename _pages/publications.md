@@ -269,88 +269,93 @@ author_profile: true
 {% endfor %}
 </div>
 
-<script>
-function filterPublications(filter, button) {
-  // Update button states
-  const buttons = document.querySelectorAll('.filter-button');
-  buttons.forEach(btn => btn.classList.remove('active'));
-  button.classList.add('active');
+<script type="text/javascript">
+(function() {
+  'use strict';
   
-  // Filter publications
-  const publications = document.querySelectorAll('.publication-item');
-  const yearHeaders = document.querySelectorAll('.pub-year-header');
-  
-  publications.forEach(pub => {
-    const isSelected = pub.getAttribute('data-selected') === 'true';
-    
-    if (filter === 'all' || (filter === 'selected' && isSelected)) {
-      pub.classList.remove('hidden');
-    } else {
-      pub.classList.add('hidden');
-    }
-  });
-  
-  // Hide year headers with no visible publications
-  yearHeaders.forEach(header => {
-    let nextElement = header.nextElementSibling;
-    let hasVisiblePub = false;
-    
-    while (nextElement && !nextElement.classList.contains('pub-year-header')) {
-      if (nextElement.classList.contains('publication-item') && 
-          !nextElement.classList.contains('hidden')) {
-        hasVisiblePub = true;
-        break;
-      }
-      nextElement = nextElement.nextElementSibling;
-    }
-    
-    if (hasVisiblePub) {
-      header.style.display = '';
-    } else {
-      header.style.display = 'none';
-    }
-  });
-}
-
-// Apply selected filter on page load and attach event listeners
-document.addEventListener('DOMContentLoaded', function() {
-  // Attach click handlers to buttons
-  const filterButtons = document.querySelectorAll('.filter-button');
-  filterButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      const filter = this.getAttribute('data-filter');
-      filterPublications(filter, this);
+  function filterPublications(filter, button) {
+    var buttons = document.querySelectorAll('.filter-button');
+    buttons.forEach(function(btn) {
+      btn.classList.remove('active');
     });
-  });
-  
-  // Apply initial filter
-  const publications = document.querySelectorAll('.publication-item');
-  const yearHeaders = document.querySelectorAll('.pub-year-header');
-  
-  publications.forEach(pub => {
-    const isSelected = pub.getAttribute('data-selected') === 'true';
-    if (!isSelected) {
-      pub.classList.add('hidden');
-    }
-  });
-  
-  // Hide year headers with no visible publications
-  yearHeaders.forEach(header => {
-    let nextElement = header.nextElementSibling;
-    let hasVisiblePub = false;
+    button.classList.add('active');
     
-    while (nextElement && !nextElement.classList.contains('pub-year-header')) {
-      if (nextElement.classList.contains('publication-item') && 
-          !nextElement.classList.contains('hidden')) {
-        hasVisiblePub = true;
-        break;
+    var publications = document.querySelectorAll('.publication-item');
+    var yearHeaders = document.querySelectorAll('.pub-year-header');
+    
+    publications.forEach(function(pub) {
+      var isSelected = pub.getAttribute('data-selected') === 'true';
+      
+      if (filter === 'all' || (filter === 'selected' && isSelected)) {
+        pub.classList.remove('hidden');
+      } else {
+        pub.classList.add('hidden');
       }
-      nextElement = nextElement.nextElementSibling;
-    }
+    });
     
-    if (!hasVisiblePub) {
-      header.style.display = 'none';
-    }
-  });
-});
+    yearHeaders.forEach(function(header) {
+      var nextElement = header.nextElementSibling;
+      var hasVisiblePub = false;
+      
+      while (nextElement && !nextElement.classList.contains('pub-year-header')) {
+        if (nextElement.classList.contains('publication-item') && 
+            !nextElement.classList.contains('hidden')) {
+          hasVisiblePub = true;
+          break;
+        }
+        nextElement = nextElement.nextElementSibling;
+      }
+      
+      if (hasVisiblePub) {
+        header.style.display = '';
+      } else {
+        header.style.display = 'none';
+      }
+    });
+  }
+  
+  function initializeFilters() {
+    var filterButtons = document.querySelectorAll('.filter-button');
+    filterButtons.forEach(function(button) {
+      button.addEventListener('click', function() {
+        var filter = this.getAttribute('data-filter');
+        filterPublications(filter, this);
+      });
+    });
+    
+    var publications = document.querySelectorAll('.publication-item');
+    var yearHeaders = document.querySelectorAll('.pub-year-header');
+    
+    publications.forEach(function(pub) {
+      var isSelected = pub.getAttribute('data-selected') === 'true';
+      if (!isSelected) {
+        pub.classList.add('hidden');
+      }
+    });
+    
+    yearHeaders.forEach(function(header) {
+      var nextElement = header.nextElementSibling;
+      var hasVisiblePub = false;
+      
+      while (nextElement && !nextElement.classList.contains('pub-year-header')) {
+        if (nextElement.classList.contains('publication-item') && 
+            !nextElement.classList.contains('hidden')) {
+          hasVisiblePub = true;
+          break;
+        }
+        nextElement = nextElement.nextElementSibling;
+      }
+      
+      if (!hasVisiblePub) {
+        header.style.display = 'none';
+      }
+    });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeFilters);
+  } else {
+    initializeFilters();
+  }
+})();
 </script>
