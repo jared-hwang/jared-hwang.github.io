@@ -166,8 +166,8 @@ author_profile: true
 {% include base_path %}
 
 <div class="filter-toggle">
-  <button class="filter-button active" onclick="filterPublications('selected', this)">Selected Publications</button>
-  <button class="filter-button" onclick="filterPublications('all', this)">All Publications</button>
+  <button class="filter-button active" data-filter="selected">Selected Publications</button>
+  <button class="filter-button" data-filter="all">All Publications</button>
 </div>
 
 <div class="publications-list">
@@ -270,11 +270,11 @@ author_profile: true
 </div>
 
 <script>
-function filterPublications(filter) {
+function filterPublications(filter, button) {
   // Update button states
   const buttons = document.querySelectorAll('.filter-button');
   buttons.forEach(btn => btn.classList.remove('active'));
-  event.target.classList.add('active');
+  button.classList.add('active');
   
   // Filter publications
   const publications = document.querySelectorAll('.publication-item');
@@ -292,14 +292,6 @@ function filterPublications(filter) {
   
   // Hide year headers with no visible publications
   yearHeaders.forEach(header => {
-    const year = header.getAttribute('data-year');
-    const visiblePubs = Array.from(publications).filter(pub => {
-      const pubYear = pub.previousElementSibling?.getAttribute?.('data-year') || 
-                      pub.parentElement.querySelector(`[data-year="${year}"]`);
-      return !pub.classList.contains('hidden') && pubYear;
-    });
-    
-    // Simple approach: check if next publications until next header are visible
     let nextElement = header.nextElementSibling;
     let hasVisiblePub = false;
     
@@ -320,8 +312,18 @@ function filterPublications(filter) {
   });
 }
 
-// Apply selected filter on page load
+// Apply selected filter on page load and attach event listeners
 document.addEventListener('DOMContentLoaded', function() {
+  // Attach click handlers to buttons
+  const filterButtons = document.querySelectorAll('.filter-button');
+  filterButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const filter = this.getAttribute('data-filter');
+      filterPublications(filter, this);
+    });
+  });
+  
+  // Apply initial filter
   const publications = document.querySelectorAll('.publication-item');
   const yearHeaders = document.querySelectorAll('.pub-year-header');
   
