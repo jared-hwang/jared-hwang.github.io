@@ -1,0 +1,225 @@
+<style>
+/* Publications section within research page */
+.research-publications {
+  margin-top: 1.5em;
+  padding-top: 0em;
+  border-top: 2px solid #e0e0e0;
+}
+
+.research-publications-header {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 0em;
+  color: #333;
+}
+
+.research-pub-item {
+  display: flex;
+  gap: 1.5em;
+  margin-bottom: 1em;
+  padding-bottom: 1em;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.research-pub-item:last-child {
+  border-bottom: none;
+}
+
+.research-pub-thumbnail {
+  flex-shrink: 0;
+  width: 120px;
+  height: 156px;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.research-pub-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.research-pub-thumbnail-placeholder {
+  color: #999;
+  font-size: 0.8em;
+  text-align: center;
+  padding: 10px;
+}
+
+.research-pub-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.research-pub-title {
+  font-size: 1em;
+  font-weight: 600;
+  margin-bottom: 0.3em;
+  line-height: 1.4;
+}
+
+.research-pub-title a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+.research-pub-title a:hover {
+  text-decoration: underline;
+}
+
+.research-pub-authors {
+  color: #555;
+  margin-bottom: 0.4em;
+  font-size: 0.95em;
+  line-height: 1.4;
+}
+
+.research-pub-venue {
+  color: #666;
+  margin-bottom: 0.3em;
+  font-size: 0.95em;
+}
+
+.research-pub-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  margin-top: 0.3em;
+  align-items: center;
+}
+
+.research-pub-link {
+  font-size: 0.7em;
+  color: #0066cc;
+  text-decoration: none;
+  padding: 0.2em 0;
+  white-space: nowrap;
+}
+
+.research-pub-link:hover {
+  text-decoration: underline;
+}
+
+.research-pub-link-separator {
+  color: #999;
+  margin: 0 0.0em;
+  user-select: none;
+}
+
+@media (max-width: 768px) {
+  .research-pub-item {
+    flex-direction: column;
+  }
+  
+  .research-pub-thumbnail {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+</style>
+
+{% include base_path %}
+
+{% assign research_slug = page.id | split: "/" | last %}
+{% assign related_pubs = site.publications | where_exp: "pub", "pub.research_project == research_slug" %}
+
+{% if related_pubs.size > 0 %}
+<section class="research-publications">
+  <h2 class="research-publications-header">Related Publications</h2>
+  
+  {% for pub in related_pubs %}
+  <div class="research-pub-item">
+    <div class="research-pub-thumbnail">
+      {% if pub.thumbnail %}
+        <img src="{{ base_path }}{{ pub.thumbnail }}" alt="{{ pub.title }} thumbnail">
+      {% elsif pub.paperurl %}
+        <img src="{{ pub.paperurl | replace: '.pdf', '-thumb.jpg' }}" 
+             alt="{{ pub.title }} thumbnail"
+             onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'research-pub-thumbnail-placeholder\'>PDF</div>';">
+      {% else %}
+        <div class="research-pub-thumbnail-placeholder">PDF</div>
+      {% endif %}
+    </div>
+
+    <div class="research-pub-content">
+      <div class="research-pub-title">
+        {% if pub.paperurl %}
+          <a href="{{ base_path }}{{ pub.paperurl }}">{{ pub.title }}</a>
+        {% else %}
+          {{ pub.title }}
+        {% endif %}
+      </div>
+      
+      {% if pub.authors %}
+      <div class="research-pub-authors">
+        {{ pub.authors }}
+      </div>
+      {% endif %}
+      
+      <div class="research-pub-venue">
+        {{ pub.venue }}
+        {% if pub.award %}
+          | <em>{{ pub.award }}</em>
+        {% endif %}
+        {% if pub.acceptance_rate %}
+          | Acceptance Rate: {{ pub.acceptance_rate }}
+        {% endif %}
+      </div>
+      
+      <div class="research-pub-links">
+        {% if pub.paperurl %}
+          <a href="{{ base_path }}{{ pub.paperurl }}" class="research-pub-link">PDF</a>
+          {% if pub.doi or pub.citation or pub.code or pub.slides or pub.video or pub.project or pub.arxiv %}
+            <span class="research-pub-link-separator">|</span>
+          {% endif %}
+        {% endif %}
+        {% if pub.doi %}
+          <a href="{{ pub.doi }}" class="research-pub-link">DOI</a>
+          {% if pub.citation or pub.code or pub.slides or pub.video or pub.project or pub.arxiv %}
+            <span class="research-pub-link-separator">|</span>
+          {% endif %}
+        {% endif %}
+        {% if pub.citation %}
+          <a href="{{ pub.citation }}" class="research-pub-link">Citation</a>
+          {% if pub.code or pub.slides or pub.video or pub.project or pub.arxiv %}
+            <span class="research-pub-link-separator">|</span>
+          {% endif %}
+        {% endif %}
+        {% if pub.code %}
+          <a href="{{ pub.code }}" class="research-pub-link">Code</a>
+          {% if pub.slides or pub.video or pub.project or pub.arxiv %}
+            <span class="research-pub-link-separator">|</span>
+          {% endif %}
+        {% endif %}
+        {% if pub.slides %}
+          <a href="{{ pub.slides }}" class="research-pub-link">Slides</a>
+          {% if pub.video or pub.project or pub.arxiv %}
+            <span class="research-pub-link-separator">|</span>
+          {% endif %}
+        {% endif %}
+        {% if pub.video %}
+          <a href="{{ pub.video }}" class="research-pub-link">Video</a>
+          {% if pub.project or pub.arxiv %}
+            <span class="research-pub-link-separator">|</span>
+          {% endif %}
+        {% endif %}
+        {% if pub.project %}
+          <a href="{{ pub.project }}" class="research-pub-link">Project</a>
+          {% if pub.arxiv %}
+            <span class="research-pub-link-separator">|</span>
+          {% endif %}
+        {% endif %}
+        {% if pub.arxiv %}
+          <a href="{{ pub.arxiv }}" class="research-pub-link">arXiv</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</section>
+{% endif %}

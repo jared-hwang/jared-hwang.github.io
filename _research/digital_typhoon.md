@@ -2,6 +2,7 @@
 title: "Machine Learning for the Digital Typhoon Dataset"
 collection: research
 type: "Research"
+status: past
 permalink: /research/digital_typhoon/
 thumbnail: /images/research_thumbs/typhoon_thumb.jpg
 thumbnail_alt: "Thumbnail of image of typhoon"
@@ -68,5 +69,4 @@ _Digital Typhoon: Long-term Satellite Image Dataset for the Spatio-Temporal Mode
 Or browse the Digital Typhoon [website](http://agora.ex.nii.ac.jp/digital-typhoon/). 
 
 
-
-
+{% include research-publications.html %}

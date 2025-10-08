@@ -2,6 +2,7 @@
 title: "Machine Learning on Liquid Argon Time Projection Chamber (LArTPC) images"
 collection: research
 type: "Research"
+status: past
 permalink: /research/lartpc_ml/
 thumbnail: /images/research_thumbs/instancesegthumbnail.png
 thumbnail_alt: "Thumbnail of Liquid Argon Time Projection Chamber image segmentation"

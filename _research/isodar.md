@@ -2,6 +2,7 @@
 title: "Isotope Decay at Rest Experiment (IsoDAR)"
 collection: research
 type: "Research"
+status: past
 permalink: /research/isodar/
 thumbnail: /images/research_thumbs/rfqthumb.png
 thumbnail_alt: "Thumbnail of RFQ simulation visualization"
