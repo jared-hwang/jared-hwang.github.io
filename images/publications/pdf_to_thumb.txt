@@ -1,0 +1,6 @@
+convert -density 600 "/Users/jaredhwang/Desktop/Personal/Programming/jared-hwang.github.io/files/accessparkcv.pdf[0]" -resize 480x624^ -gravity center -extent 480x624 /Users/jaredhwang/Desktop/Personal/Programming/jared-hwang.github.io/images/publications/accessparkcv.jpg
+
+convert -density 600 "_CHI_26__BikeButler_R_R.pdf[0]" -resize 480x624^ -gravity center -extent 480x624 bikebutler_thumbnail.jpg
+
+convert -density 600 "/Users/jaredhwang/Desktop/Personal/Programming/jared-hwang.github.io/files/bikebutler.pdf[0]" -resize 480x624^ -gravity center -extent 480x624 bikebutler_thumbnail.jpg
+
