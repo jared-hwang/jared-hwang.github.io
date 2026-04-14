@@ -25,7 +25,7 @@ Check out my [Research](/research/) and [CV](/cv_file/hwang_CV.pdf) to see how m
 
 Recent news
 ======
-[04/26] Our paper on generating personalized bike routes (BikeButler: A Personalized, Context-sensitive Bike Routing Tool using Open Data and VLM-based Analyses of Street View Imagery [\[link\]](https://dl.acm.org/doi/10.1145/3772318.3791292)), was accepted to CHI'26! I will be presenting this in Barcelona!
+[04/26] Our paper on generating personalized bike routes ([BikeButler: A Personalized, Context-sensitive Bike Routing Tool using Open Data and VLM-based Analyses of Street View Imagery](https://dl.acm.org/doi/10.1145/3772318.3791292)), was accepted to CHI'26! I will be presenting this in Barcelona!
 
 [05/2025] Our paper, ["'Where Can _I_ Park?' Understanding Human Perspectives and Scalably Detecting Disability Parking from Aerial Imagery"](https://www.arxiv.org/abs/2509.25460) was accepted to ASSETS '25. I will be presenting this work in person in Denver!
 
