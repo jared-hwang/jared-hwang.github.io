@@ -15,11 +15,12 @@ My research interests are in urban informatics and urban data understanding, pow
   * 📝 Tools for **managing raw, multimodal data**
       * How can we bridge the gap between collecting multimodal data and using it in downstream applications?
   * 💡 Using AI to **extract insight**
-      * How can AI help us extract insight out of unstructured, differently structured, and multi-dimensional data?
-      * What is enabled by state-of-the-art models that previous generation models struggled with?
+      * How can AI extract insight out of unstructured and multi-dimensional data?
+      * How can we make _context aware_, personalized systems for urban exploration?
+      <!-- * What is enabled by state-of-the-art models that previous generation models struggled with? -->
   * 🚞 Building **better cities**
-      * How can we use computational methods to extract insight about our cities and how humans live?
-      * How can we present this insight to policymakers and individuals in an intuitive way?
+      * How can we extract insight about our cities and how humans live?
+      * How can we present this insight to policymakers and individuals intuitively?
       * How can this insight ultimately guide us in designing better cities?
 
 <!-- 
