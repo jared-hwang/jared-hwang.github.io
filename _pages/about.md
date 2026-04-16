@@ -11,6 +11,18 @@ redirect_from:
 Hello! I'm Jared. I'm a second-year PhD student at the UW Paul G. Allen School for Computer Science & Engineering. I am a part of the [Makeability Lab](https://makeabilitylab.cs.washington.edu/), advised by [Jon Froehlich](https://jonfroehlich.github.io/), working to make cities more sustainable and accessible.
 <!-- I got my M.S. in CS at the University of Southern California, and before that my B.S. in Physics and CS at Tufts University. -->
 
+My research interests are in urban informatics and urban data understanding, powered by AI and computer vision. Specifically:
+  * 📝 Tools for **managing raw, multimodal data**
+      * How can we bridge the gap between collecting multimodal data and using it in downstream applications?
+  * 💡 Using AI to **extract insight**
+      * How can AI help us extract insight out of unstructured, differently structured, and multi-dimensional data?
+      * What is enabled by state-of-the-art models that previous generation models struggled with?
+  * 🚞 Building **better cities**
+      * How can we use computational methods to extract insight about our cities and how humans live?
+      * How can we present this insight to policymakers and individuals in an intuitive way?
+      * How can this insight ultimately guide us in designing better cities?
+
+<!-- 
 My research interests lie in applied ML and urban informatics. Specifically:
   * 📝 Tools for **managing raw data**
       * How can we bridge the gap between collecting data and using it?
@@ -19,7 +31,7 @@ My research interests lie in applied ML and urban informatics. Specifically:
       * How can ML lead us to results that would have taken longer to reach without ML?
   * 🚞 Building **better cities**
       * How can we use ML/computational methods to extract insight about our cities and how humans live?
-      * How can this insight guide us in designing better cities?
+      * How can this insight guide us in designing better cities? -->
 
 Check out my [Research](/research/) and [CV](/cv_file/hwang_CV.pdf) to see how my interests got to where they are now. Or, if you want to chat with me about my research, cities, the PhD program, or anything else, reach out to me at my email!
 
