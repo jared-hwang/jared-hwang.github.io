@@ -56,4 +56,4 @@ Recent news
 * I recently got into photography! I'm not good. [portfolio pending](https://jared-hwang.github.io/) -->
 
 
-<sub>Page updated October 2025.</sub>
+<sub>Page updated April 2026.</sub>
