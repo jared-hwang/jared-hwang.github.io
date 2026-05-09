@@ -12,6 +12,7 @@
              alt="{{ post.title }}"
              class="accordion-image">
       {% endif %}
+      <span class="accordion-image-fade" aria-hidden="true"></span>
     </div>
 
     <div class="accordion-text">
@@ -20,6 +21,9 @@
         {% if post.daterange %}
           <span class="accordion-year">{{ post.daterange }}</span>
         {% endif %}
+        <svg class="accordion-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
       </div>
       {% if post.venue %}
         <div class="accordion-venue">{{ post.venue }}</div>
@@ -28,18 +32,10 @@
         <div class="accordion-summary">{{ post.excerpt | markdownify | strip_html }}</div>
       {% endif %}
     </div>
-
-    <svg class="accordion-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <polyline points="6 9 12 15 18 9"></polyline>
-    </svg>
   </div>
 
   <div class="accordion-detail">
-    <div class="accordion-detail-inner">
-      {% if post.excerpt %}
-        <div class="accordion-description">{{ post.excerpt | markdownify }}</div>
-      {% endif %}
-
+    <div class="accordion-detail-inner accordion-body">
       {% if post.tags and post.tags.size > 0 %}
         <div class="accordion-tags">
           {% for tag in post.tags %}
@@ -47,21 +43,7 @@
           {% endfor %}
         </div>
       {% endif %}
-
-      <div class="accordion-links">
-        {% if post.links %}
-          {% for link in post.links %}
-            <a href="{% if link.url contains '://' %}{{ link.url }}{% else %}{{ base_path }}{{ link.url }}{% endif %}" class="accordion-link" target="_blank" rel="noopener">
-              <span class="accordion-link-icon">{{ link.icon }}</span>{{ link.label }}
-            </a>
-          {% endfor %}
-        {% endif %}
-        {% if post.permalink %}
-          <a href="{{ base_path }}{{ post.permalink }}" class="accordion-link">
-            <span class="accordion-link-icon">📁</span>Project page
-          </a>
-        {% endif %}
-      </div>
+      {{ post.content }}
     </div>
   </div>
 </div>
