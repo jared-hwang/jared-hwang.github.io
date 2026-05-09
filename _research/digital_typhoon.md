@@ -12,6 +12,20 @@ date: 08/2023
 location: "Tokyo, Japan"
 supervisor: "Prof. Asanobu Kitamoto" 
 excerpt: "Preparing, publishing, and using the Digital Typhoon Dataset for machine learning. The dataset is the longest typhoon satellite image dataset available. We developed ways to interact with the dataset for ML, and performed benchmarks in analysis, reanalysis, and forecasting."
+tags:
+  - Machine learning
+  - Dataset
+  - Climate
+links:
+  - label: Paper
+    url: /files/digital_typhoon_neurips.pdf
+    icon: "📄"
+  - label: GitHub
+    url: https://github.com/kitamoto-lab/pyphoon2
+    icon: "🔗"
+  - label: Website
+    url: http://agora.ex.nii.ac.jp/digital-typhoon/
+    icon: "🌐"
 ---
 
 The Digital Typhoon Project aims to collect, standardize, and curate typhoon (hurricane) satellite images in the Western North Pacific. It was started in 1997, and the Digital Typhoon Dataset covers over 40 years from 1978 to 2023 -- the longest typhoon satellite dataset available. 

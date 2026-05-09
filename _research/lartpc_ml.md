@@ -12,6 +12,9 @@ date: 09/2021
 location: "Medford, Massachusetts"
 supervisor: "Prof. Taritree Wongjirad"
 excerpt: "Building tools with ML for analyzing neutrino detector images from a Liquid Argon Time Projection Chamber. Using a VQVAE to compress large image files, and performing instance segmentation on the LArTPC images to extract neutrino trails."
+tags:
+  - Machine learning
+  - Physics
 ---
 
 Liquid argon time projection chambers (LArTPCs) are a type of particle detector used in neutrino experiments. To make the most of the detector data, we must reconstruct and identify particle paths through the detector accurately. The [Neutrino Group at Tufts University](https://sites.tufts.edu/nutufts/) explores the [use of deep neural networks](https://sites.tufts.edu/nutufts/projects/lartpc-reconstruction-with-deep-convolutional-neural-networks/) to reconstruct particle interactions.

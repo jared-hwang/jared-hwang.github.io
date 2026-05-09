@@ -1,47 +1,67 @@
 {% include base_path %}
 
-<div class="research-card">
-  <div class="research-image-container">
-    {% if post.thumbnail %}
-      <img src="{{ base_path }}{{ post.thumbnail }}" 
-           alt="{{ post.thumbnail_alt | default: post.title }}" 
-           class="research-image">
-    {% else %}
-      <img src="{{ base_path }}/images/default-research.jpg" 
-           alt="{{ post.title }}" 
-           class="research-image">
-    {% endif %}
-    
-    <div class="research-content">
-      <h2 class="research-title">
-        {% if post.link %}
-          <a href="{{ post.link }}">{{ post.title }}</a>
-        {% elsif post.permalink %}
-          <a href="{{ base_path }}{{ post.permalink }}">{{ post.title }}</a>
-        {% else %}
-          {{ post.title }}
-        {% endif %}
-      </h2>
-      
-      <div class="research-meta">
-        {% if post.location %}
-          <span>📍 {{ post.location }}</span>
-        {% endif %}
+<div class="accordion-row" data-accordion-row>
+  <div class="accordion-header">
+    <div class="accordion-image-wrap">
+      {% if post.thumbnail %}
+        <img src="{{ base_path }}{{ post.thumbnail }}"
+             alt="{{ post.thumbnail_alt | default: post.title }}"
+             class="accordion-image">
+      {% else %}
+        <img src="{{ base_path }}/images/default-research.jpg"
+             alt="{{ post.title }}"
+             class="accordion-image">
+      {% endif %}
+    </div>
+
+    <div class="accordion-text">
+      <div class="accordion-title-row">
+        <span class="accordion-title">{{ post.title }}</span>
         {% if post.daterange %}
-          <span>📅 {{ post.daterange }}</span>
-        {% endif %}
-        {% if post.venue %}
-          <span>🏛️ {{ post.venue }}</span>
+          <span class="accordion-year">{{ post.daterange }}</span>
         {% endif %}
       </div>
-      
+      {% if post.venue %}
+        <div class="accordion-venue">{{ post.venue }}</div>
+      {% endif %}
       {% if post.excerpt %}
-        <div class="research-excerpt">{{ post.excerpt | markdownify }}</div>
+        <div class="accordion-summary">{{ post.excerpt | markdownify | strip_html }}</div>
       {% endif %}
-      
-      {% if post.supervisor %}
-        <div class="research-supervisor">Supervisor: {{ post.supervisor }}</div>
+    </div>
+
+    <svg class="accordion-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+  </div>
+
+  <div class="accordion-detail">
+    <div class="accordion-detail-inner">
+      {% if post.excerpt %}
+        <div class="accordion-description">{{ post.excerpt | markdownify }}</div>
       {% endif %}
+
+      {% if post.tags and post.tags.size > 0 %}
+        <div class="accordion-tags">
+          {% for tag in post.tags %}
+            <span class="accordion-tag tag-{{ tag | downcase | replace: ' ', '-' }}">{{ tag }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="accordion-links">
+        {% if post.links %}
+          {% for link in post.links %}
+            <a href="{% if link.url contains '://' %}{{ link.url }}{% else %}{{ base_path }}{{ link.url }}{% endif %}" class="accordion-link" target="_blank" rel="noopener">
+              <span class="accordion-link-icon">{{ link.icon }}</span>{{ link.label }}
+            </a>
+          {% endfor %}
+        {% endif %}
+        {% if post.permalink %}
+          <a href="{{ base_path }}{{ post.permalink }}" class="accordion-link">
+            <span class="accordion-link-icon">📁</span>Project page
+          </a>
+        {% endif %}
+      </div>
     </div>
   </div>
 </div>

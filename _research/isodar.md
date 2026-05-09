@@ -12,6 +12,19 @@ daterange: Jun 2018 - March 2020
 location: "Cambridge, Massachusetts"
 supervisor: "Prof. Janet Conrad"
 excerpt: "Developing a simulation code from the ground up for Radio Frequency Quadrupoles (RFQs). Designed to support existing simulation infrastructure, accurately simulate space-charge (interaction between charged particles), and parallelization. Faster and more scientifically accurate than existing alternatives!"
+tags:
+  - Physics
+  - Simulation
+links:
+  - label: Paper
+    url: https://arxiv.org/abs/1307.5081
+    icon: "📄"
+  - label: GitHub
+    url: https://github.com/DanielWinklehner/PyRFQ
+    icon: "🔗"
+  - label: Website
+    url: https://www.nevis.columbia.edu/daedalus/
+    icon: "🌐"
 ---
 
 The IsoDAR experiment searches for sterile neutrino oscillations and non-standard neutrino interactions. Once built, the IsoDAR accelerator will send dihydrogen molecules through a **radio frequency quadrupole** (RFQ), then a cyclotron, to then impinge onto a Be and Li target, producing antineutrinos that we detect and can study. 
