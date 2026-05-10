@@ -1,0 +1,75 @@
+---
+import Base from "../layouts/Base.astro";
+import AuthorProfile from "../components/AuthorProfile.astro";
+import NewsTimeline from "../components/NewsTimeline.astro";
+---
+
+<Base wide>
+  <div class="grid grid-cols-1 gap-10 md:grid-cols-4">
+    <aside class="md:sticky md:top-12 md:self-start">
+      <AuthorProfile />
+    </aside>
+    <div class="md:col-span-3">
+  <section class="prose-lg max-w-none">
+    <p class="text-lg leading-relaxed">
+      Hello! I'm Jared. I'm a second-year PhD student at the UW Paul G.
+      Allen School for Computer Science &amp; Engineering. I am a part of
+      the
+      <a
+        href="https://makeabilitylab.cs.washington.edu/"
+        class="underline decoration-accent-600/50 underline-offset-4 hover:decoration-accent-700 dark:decoration-accent-400/60 dark:hover:decoration-accent-300"
+        >Makeability Lab</a
+      >, advised by
+      <a
+        href="https://jonfroehlich.github.io/"
+        class="underline decoration-accent-600/50 underline-offset-4 hover:decoration-accent-700 dark:decoration-accent-400/60 dark:hover:decoration-accent-300"
+        >Jon Froehlich</a
+      >, working to make cities more sustainable and accessible.
+    </p>
+
+    <p class="mt-6 leading-relaxed">
+      My research interests are in urban informatics and urban data
+      understanding, powered by AI and computer vision. Specifically:
+    </p>
+
+    <ul class="mt-4 space-y-3 leading-relaxed">
+      <li>
+        📝 Tools for <strong>managing raw, multimodal data</strong> — how
+        can we bridge the gap between collecting multimodal data and using
+        it in downstream applications?
+      </li>
+      <li>
+        💡 Using AI to <strong>extract insight</strong> — how can AI extract
+        insight out of unstructured and multi-dimensional data, and how can
+        we make context-aware, personalized systems for urban exploration?
+      </li>
+      <li>
+        🚞 Building <strong>better cities</strong> — how can we surface
+        insight about our cities and the people who live in them, and
+        present it to policymakers and individuals intuitively?
+      </li>
+    </ul>
+
+    <p class="mt-6 leading-relaxed">
+      Check out my
+      <a
+        href="/research"
+        class="underline decoration-accent-600/50 underline-offset-4 hover:decoration-accent-700 dark:decoration-accent-400/60 dark:hover:decoration-accent-300"
+        >research</a
+      > and
+      <a
+        href="/cv_file/hwang_CV.pdf"
+        class="underline decoration-accent-600/50 underline-offset-4 hover:decoration-accent-700 dark:decoration-accent-400/60 dark:hover:decoration-accent-300"
+        >CV</a
+      > to see how my interests got to where they are now. Or, if you want
+      to chat about research, cities, the PhD program, or anything else,
+      reach out by email.
+    </p>
+  </section>
+
+  <div class="mt-16">
+    <NewsTimeline />
+  </div>
+    </div>
+  </div>
+</Base>

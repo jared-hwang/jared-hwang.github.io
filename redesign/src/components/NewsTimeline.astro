@@ -1,0 +1,56 @@
+---
+import { getCollection, render } from "astro:content";
+
+const entries = (await getCollection("news")).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
+
+const rendered = await Promise.all(
+  entries.map(async (entry) => {
+    const { Content } = await render(entry);
+    return { entry, Content };
+  }),
+);
+
+const fmt = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
+---
+
+<section>
+  <h2
+    class="mb-6 text-sm font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400"
+  >
+    News
+  </h2>
+  <ol
+    class="relative space-y-8 border-l border-neutral-200 pl-6 dark:border-neutral-800"
+  >
+    {
+      rendered.map(({ entry, Content }) => (
+        <li class="relative">
+          <span class="timeline-dot absolute top-1.5 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-neutral-400 ring-4 ring-white dark:bg-neutral-600 dark:ring-neutral-950" />
+          <time class="block text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+            {fmt.format(entry.data.date)}
+          </time>
+          <div class="mt-1 leading-relaxed [&_a]:underline [&_a]:decoration-accent-600/50 [&_a]:underline-offset-4 [&_a:hover]:decoration-accent-700 dark:[&_a]:decoration-accent-400/60 dark:[&_a:hover]:decoration-accent-300 [&_strong]:font-semibold">
+            <Content />
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  /* Horizontal alignment of the dot on the timeline line.
+     Tweak --dot-nudge to nudge the dot left (negative) or right (positive).
+     Currently 0px = mathematically centered; the user perceives it slightly
+     right, so a small negative value (e.g. -1px) shifts it left. */
+  .timeline-dot {
+    --dot-nudge: -0.5px;
+    left: calc(-1.5rem + var(--dot-nudge));
+  }
+</style>

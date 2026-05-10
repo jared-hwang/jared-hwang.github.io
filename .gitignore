@@ -1,2 +1,4 @@
 _site/
-
+redesign/node_modules
+redesign/dist
+redesign/.astro

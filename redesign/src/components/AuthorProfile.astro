@@ -1,0 +1,124 @@
+---
+import { SITE } from "../consts";
+import SocialLink from "./SocialLink.astro";
+
+const socials = [
+  { key: "email", label: "Email", href: `mailto:${SITE.email}`, icon: "envelope" },
+  { key: "scholar", label: "Google Scholar", href: SITE.links.scholar, icon: "scholar" },
+  { key: "linkedin", label: "LinkedIn", href: SITE.links.linkedin, icon: "linkedin" },
+  { key: "twitter", label: "Twitter", href: SITE.links.twitter, icon: "twitter" },
+] as const;
+---
+
+<aside class="author-profile">
+  <img
+    src={SITE.avatar}
+    alt={SITE.author}
+    class="author-avatar mb-4 h-32 w-32 rounded-full object-cover"
+  />
+  <h2 class="author-name text-lg font-semibold tracking-tight">
+    {SITE.author}
+  </h2>
+  <p
+    class="author-bio mt-2 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400"
+  >
+    {SITE.description}
+  </p>
+
+  <p
+    class="author-location mt-3 flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400"
+  >
+    <svg
+      class="h-3.5 w-3.5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+      <circle cx="12" cy="10" r="3"></circle>
+    </svg>
+    {SITE.location}
+  </p>
+
+  <!-- Mobile: collapsible dropdown (hidden on desktop) -->
+  <details class="socials-details mt-4 md:hidden">
+    <summary
+      class="flex cursor-pointer list-none items-center justify-between rounded-md border border-neutral-200 px-3 py-2.5 text-sm text-neutral-700 transition-colors hover:border-accent-600/50 hover:bg-accent-50 hover:text-accent-700 dark:border-neutral-800 dark:text-neutral-300 dark:hover:border-accent-400/40 dark:hover:bg-accent-950/40 dark:hover:text-accent-300"
+    >
+      <span class="font-medium">Socials</span>
+      <svg
+        class="h-4 w-4 transition-transform"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </summary>
+    <ul class="author-socials mt-2 space-y-1.5 text-sm">
+      {socials.map((s) => <SocialLink s={s} />)}
+    </ul>
+  </details>
+
+  <!-- Desktop: always-visible list (hidden on mobile) -->
+  <ul class="author-socials mt-4 hidden space-y-1.5 text-sm md:block">
+    {socials.map((s) => <SocialLink s={s} />)}
+  </ul>
+</aside>
+
+<style is:global>
+  /* Hide the default disclosure triangle on <summary> */
+  .socials-details > summary::-webkit-details-marker { display: none; }
+  /* Rotate the chevron when <details> is open */
+  .socials-details[open] > summary > svg { transform: rotate(180deg); }
+
+  /* Subtle rainbow sheen on hover.
+     Tunables:
+       --sheen-alpha   : per-color opacity (lower = more subtle)
+       --sheen-speed   : seconds for one full drift cycle
+       --sheen-fade    : ms for fade-in / fade-out
+  */
+  .social-link a {
+    --sheen-alpha: 0.18;
+    --sheen-speed: 7s;
+    --sheen-fade: 400ms;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .social-link a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--sheen-fade) ease;
+    background: linear-gradient(
+      115deg,
+      oklch(80% 0.16 25 / var(--sheen-alpha)),
+      oklch(82% 0.16 80 / var(--sheen-alpha)),
+      oklch(78% 0.16 145 / var(--sheen-alpha)),
+      oklch(74% 0.18 215 / var(--sheen-alpha)),
+      oklch(70% 0.20 290 / var(--sheen-alpha)),
+      oklch(80% 0.16 25 / var(--sheen-alpha))
+    );
+    background-size: 220% 100%;
+    background-position: 0% 50%;
+  }
+  .social-link a:hover::after {
+    opacity: 1;
+    animation: rainbow-drift var(--sheen-speed) linear infinite;
+  }
+  @keyframes rainbow-drift {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 220% 50%; }
+  }
+</style>

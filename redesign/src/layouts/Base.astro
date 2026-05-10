@@ -1,0 +1,79 @@
+---
+import "../styles/global.css";
+import { SITE } from "../consts";
+import ThemeToggle from "../components/ThemeToggle.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+  wide?: boolean;
+}
+
+const { title, description, wide = false } = Astro.props;
+const pageTitle = title ? `${title} · ${SITE.title}` : SITE.title;
+const pageDescription = description ?? SITE.description;
+const containerW = wide ? "max-w-6xl" : "max-w-3xl";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <script is:inline>
+      const stored = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      if (stored === "dark" || (!stored && prefersDark)) {
+        document.documentElement.classList.add("dark");
+      }
+    </script>
+  </head>
+  <body
+    class="min-h-screen bg-white text-neutral-900 antialiased dark:bg-neutral-950 dark:text-neutral-100"
+  >
+    <header
+      class="border-b border-neutral-200 dark:border-neutral-800"
+    >
+      <div
+        class:list={["mx-auto flex items-center justify-between px-6 py-5", containerW]}
+      >
+        <a href="/" class="font-semibold tracking-tight">{SITE.title}</a>
+        <div class="flex items-center gap-5">
+          <nav class="flex gap-6 text-sm">
+            {
+              SITE.nav.map((item) => (
+                <a href={item.href} class="hover:underline">
+                  {item.label}
+                </a>
+              ))
+            }
+          </nav>
+          <ThemeToggle />
+        </div>
+      </div>
+    </header>
+    <main class:list={["mx-auto px-6 py-12", containerW]}>
+      <slot />
+    </main>
+    <footer
+      class="mt-20 border-t border-neutral-200 dark:border-neutral-800"
+    >
+      <div
+        class:list={["mx-auto flex flex-wrap items-center justify-between gap-2 px-6 py-6 text-sm text-neutral-500 dark:text-neutral-400", containerW]}
+      >
+        <span>{SITE.author} · {new Date().getFullYear()}</span>
+        <span class="flex gap-4">
+          <a href={SITE.links.github} class="hover:underline">GitHub</a>
+          <a href={SITE.links.scholar} class="hover:underline">Scholar</a>
+          <a href={`mailto:${SITE.email}`} class="hover:underline">Email</a>
+        </span>
+      </div>
+    </footer>
+  </body>
+</html>

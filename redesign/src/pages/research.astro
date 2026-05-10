@@ -1,0 +1,61 @@
+---
+import Base from "../layouts/Base.astro";
+import ResearchAccordion from "../components/ResearchAccordion.astro";
+---
+
+<Base title="Research" description="Research projects by Jared Hwang">
+  <h1 class="mb-2 text-2xl font-semibold tracking-tight">Research</h1>
+  <p class="mb-10 text-sm text-neutral-600 dark:text-neutral-400">
+    Click a project to expand.
+  </p>
+
+  <section class="mb-12">
+    <h2
+      class="mb-3 text-sm font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400"
+    >
+      Current
+    </h2>
+    <ResearchAccordion status="current" />
+  </section>
+
+  <section>
+    <h2
+      class="mb-3 text-sm font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400"
+    >
+      Past
+    </h2>
+    <ResearchAccordion status="past" />
+  </section>
+</Base>
+
+<script>
+  const rows = document.querySelectorAll<HTMLElement>(".research-row");
+
+  rows.forEach((row) => {
+    const toggle = row.querySelector<HTMLButtonElement>(".research-toggle");
+    if (!toggle) return;
+
+    toggle.addEventListener("click", () => {
+      const wasExpanded = row.dataset.expanded === "true";
+
+      // Close all other rows on this page
+      rows.forEach((r) => {
+        if (r !== row) {
+          r.dataset.expanded = "false";
+          r.querySelector(".research-toggle")?.setAttribute(
+            "aria-expanded",
+            "false",
+          );
+        }
+      });
+
+      row.dataset.expanded = (!wasExpanded).toString();
+      toggle.setAttribute("aria-expanded", (!wasExpanded).toString());
+
+      if (!wasExpanded) {
+        // Smooth-scroll the just-opened row into view
+        toggle.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    });
+  });
+</script>

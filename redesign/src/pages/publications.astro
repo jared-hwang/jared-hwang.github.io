@@ -1,0 +1,201 @@
+---
+import Base from "../layouts/Base.astro";
+import { getCollection } from "astro:content";
+import { SITE } from "../consts";
+
+const pubs = (await getCollection("publications")).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
+
+const yearOf = (d: Date) => d.getUTCFullYear();
+
+// Group publications by year (preserving sort order)
+const byYear = new Map<number, typeof pubs>();
+for (const p of pubs) {
+  const y = yearOf(p.data.date);
+  if (!byYear.has(y)) byYear.set(y, []);
+  byYear.get(y)!.push(p);
+}
+
+// Build a flat ordered list of links per pub for cleaner rendering with separators
+type LinkSpec = { label: string; href: string };
+function linksFor(data: (typeof pubs)[number]["data"]): LinkSpec[] {
+  const out: LinkSpec[] = [];
+  if (data.paperurl) out.push({ label: "PDF", href: data.paperurl });
+  if (data.doi) out.push({ label: "DOI", href: data.doi });
+  if (data.citation) out.push({ label: "Citation", href: data.citation });
+  if (data.code) out.push({ label: "Code", href: data.code });
+  if (data.slides) out.push({ label: "Slides", href: data.slides });
+  if (data.video) out.push({ label: "Video", href: data.video });
+  if (data.arxiv) out.push({ label: "arXiv", href: data.arxiv });
+  return out;
+}
+---
+
+<Base title="Publications" description="Publications by Jared Hwang">
+  <header class="mb-6">
+    <h1 class="text-2xl font-semibold tracking-tight">Publications</h1>
+    <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+      You can also find my articles on
+      <a
+        href={SITE.links.scholar}
+        class="underline decoration-accent-600/50 underline-offset-4 hover:decoration-accent-700 dark:decoration-accent-400/60 dark:hover:decoration-accent-300"
+        >my Google Scholar profile</a
+      >.
+    </p>
+  </header>
+
+  <div
+    id="filter-toggle"
+    class="mb-8 inline-flex rounded-md border border-accent-700/40 dark:border-accent-400/40"
+    role="tablist"
+  >
+    <button
+      type="button"
+      data-filter="selected"
+      class="filter-button px-4 py-1.5 text-sm font-medium transition aria-pressed:bg-accent-600 aria-pressed:text-white dark:aria-pressed:bg-accent-500"
+      aria-pressed="true"
+    >
+      Selected
+    </button>
+    <button
+      type="button"
+      data-filter="all"
+      class="filter-button px-4 py-1.5 text-sm font-medium transition aria-pressed:bg-accent-600 aria-pressed:text-white dark:aria-pressed:bg-accent-500"
+      aria-pressed="false"
+    >
+      All
+    </button>
+  </div>
+
+  <div id="publications-list" class="space-y-10">
+    {
+      Array.from(byYear.entries()).map(([year, list]) => (
+        <section data-year={year}>
+          <h2 class="pub-year-header mb-4 text-lg font-semibold tracking-tight text-neutral-700 dark:text-neutral-300">
+            {year}
+          </h2>
+          <ul class="divide-y divide-neutral-200 dark:divide-neutral-800">
+            {list.map((pub) => {
+              const links = linksFor(pub.data);
+              return (
+                <li
+                  class="publication-item flex gap-5 py-5"
+                  data-selected={pub.data.selected ? "true" : "false"}
+                >
+                  <div class="shrink-0">
+                    <div class="flex h-[156px] w-[120px] items-center justify-center overflow-hidden border border-neutral-200 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900">
+                      {pub.data.thumbnail ? (
+                        <img
+                          src={pub.data.thumbnail}
+                          alt={`${pub.data.title} thumbnail`}
+                          class="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <span class="text-xs text-neutral-400">PDF</span>
+                      )}
+                    </div>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <h3 class="text-base font-medium leading-snug">
+                      {pub.data.paperurl ? (
+                        <a
+                          href={pub.data.paperurl}
+                          class="text-accent-700 hover:underline dark:text-accent-300"
+                          set:html={pub.data.title}
+                        />
+                      ) : (
+                        <span set:html={pub.data.title} />
+                      )}
+                    </h3>
+                    {pub.data.authors && (
+                      <p
+                        class="mt-1 text-sm text-neutral-600 dark:text-neutral-400 [&_b]:font-semibold"
+                        set:html={pub.data.authors}
+                      />
+                    )}
+                    {pub.data.venue && (
+                      <p class="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+                        {pub.data.venue}
+                        {pub.data.award && (
+                          <span>
+                            {" | "}
+                            <em>{pub.data.award}</em>
+                          </span>
+                        )}
+                        {pub.data.acceptance_rate && (
+                          <span>
+                            {" | Acceptance Rate: "}
+                            {pub.data.acceptance_rate}
+                          </span>
+                        )}
+                      </p>
+                    )}
+                    {links.length > 0 && (
+                      <p class="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+                        {links.map((link, i) => (
+                          <>
+                            {i > 0 && (
+                              <span class="mx-1.5 text-neutral-300 dark:text-neutral-700">
+                                |
+                              </span>
+                            )}
+                            <a
+                              href={link.href}
+                              class="text-accent-700 hover:underline dark:text-accent-300"
+                            >
+                              {link.label}
+                            </a>
+                          </>
+                        ))}
+                      </p>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))
+    }
+  </div>
+</Base>
+
+<script>
+  (() => {
+    const buttons = document.querySelectorAll<HTMLButtonElement>(
+      "#filter-toggle .filter-button",
+    );
+    const items =
+      document.querySelectorAll<HTMLElement>(".publication-item");
+    const sections =
+      document.querySelectorAll<HTMLElement>("#publications-list section");
+
+    function applyFilter(filter: "selected" | "all") {
+      items.forEach((item) => {
+        const isSelected = item.dataset.selected === "true";
+        item.hidden = filter === "selected" && !isSelected;
+      });
+      sections.forEach((section) => {
+        const anyVisible = section.querySelector<HTMLElement>(
+          ".publication-item:not([hidden])",
+        );
+        section.hidden = !anyVisible;
+      });
+      buttons.forEach((b) => {
+        b.setAttribute(
+          "aria-pressed",
+          (b.dataset.filter === filter).toString(),
+        );
+      });
+    }
+
+    buttons.forEach((b) => {
+      b.addEventListener("click", () => {
+        applyFilter(b.dataset.filter as "selected" | "all");
+      });
+    });
+
+    applyFilter("selected");
+  })();
+</script>

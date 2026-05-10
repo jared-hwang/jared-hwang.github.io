@@ -1,0 +1,128 @@
+---
+import { getCollection, render } from "astro:content";
+
+interface Props {
+  status: "current" | "past";
+}
+
+const { status } = Astro.props;
+
+const all = await getCollection("research");
+const items = all
+  .filter((e) => e.data.status === status)
+  .sort((a, b) => (a.data.date && b.data.date ? b.data.date.localeCompare(a.data.date) : 0));
+
+const rendered = await Promise.all(
+  items.map(async (entry) => {
+    const { Content } = await render(entry);
+    return { entry, Content };
+  }),
+);
+---
+
+<ul class="divide-y divide-neutral-200 dark:divide-neutral-800">
+  {
+    rendered.map(({ entry, Content }) => (
+      <li class="research-row group" data-expanded="false">
+        <button
+          type="button"
+          class="research-toggle flex w-full items-center gap-4 py-4 text-left transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-900/50"
+          aria-expanded="false"
+        >
+          <div class="research-thumb relative shrink-0 overflow-hidden rounded-md bg-neutral-100 dark:bg-neutral-800">
+            <img
+              src={entry.data.thumbnail}
+              alt={entry.data.thumbnail_alt ?? entry.data.title}
+              class="block h-full w-full object-cover"
+            />
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-baseline gap-3">
+              <h3 class="flex-1 text-base font-medium leading-snug">
+                {entry.data.title}
+              </h3>
+              {entry.data.daterange && (
+                <span class="shrink-0 text-xs text-accent-700 dark:text-accent-300">
+                  {entry.data.daterange}
+                </span>
+              )}
+              <svg
+                class="research-chevron shrink-0 text-neutral-400 transition-transform"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            {entry.data.venue && (
+              <div class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                {entry.data.venue}
+              </div>
+            )}
+            <p
+              class="research-summary mt-1 line-clamp-2 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400"
+              set:html={entry.data.excerpt}
+            />
+          </div>
+        </button>
+
+        <div class="research-detail">
+          <div class="pb-6 pl-[calc(140px+1rem)] pr-2">
+            {entry.data.tags.length > 0 && (
+              <div class="mb-3 flex flex-wrap gap-1.5">
+                {entry.data.tags.map((tag) => (
+                  <span class="rounded-full bg-accent-100 px-2 py-0.5 text-[11px] font-medium text-accent-800 dark:bg-accent-900/40 dark:text-accent-200">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div class="research-body prose-sm max-w-none text-sm leading-relaxed text-neutral-700 dark:text-neutral-300 [&_a]:text-accent-700 [&_a]:underline [&_a]:decoration-accent-600/50 [&_a:hover]:decoration-accent-700 dark:[&_a]:text-accent-300 dark:[&_a]:decoration-accent-400/60 dark:[&_a:hover]:decoration-accent-300 [&_h2]:mt-4 [&_h2]:text-base [&_h2]:font-semibold [&_h3]:mt-3 [&_h3]:text-sm [&_h3]:font-semibold [&_img]:my-3 [&_img]:rounded [&_p]:my-2 [&_strong]:font-semibold">
+              <Content />
+            </div>
+          </div>
+        </div>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .research-thumb {
+    width: 140px;
+    height: 80px;
+  }
+  .research-detail {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 350ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .research-detail > div {
+    overflow: hidden;
+  }
+  .research-row[data-expanded="true"] .research-detail {
+    grid-template-rows: 1fr;
+  }
+  .research-row[data-expanded="true"] .research-chevron {
+    transform: rotate(180deg);
+  }
+  .research-row[data-expanded="true"] .research-summary {
+    display: none;
+  }
+  @media (max-width: 640px) {
+    .research-thumb {
+      width: 96px;
+      height: 56px;
+    }
+    .research-row .research-detail > div {
+      padding-left: 0 !important;
+    }
+  }
+</style>

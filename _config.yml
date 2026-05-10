@@ -147,6 +147,7 @@ exclude:
   - package.json
   - tmp
   - vendor
+  - redesign
 keep_files:
   - .git
   - .svn
