@@ -64,3 +64,59 @@ const { s } = Astro.props;
     <span>{s.label}</span>
   </a>
 </li>
+
+<style>
+  /* Rainbow sheen on hover — restricted to the button border.
+     Uses the CSS "gradient border" trick: the pseudo-element fills the
+     button area with a rainbow gradient, then a mask carves out the
+     inner content-box so only the ring around the edge remains visible.
+
+     Tunables:
+       --sheen-alpha     : per-color opacity (border is thin, so 0.7–1.0 works)
+       --sheen-thickness : ring thickness; matches the existing 1px border
+       --sheen-speed     : seconds for one full drift cycle
+       --sheen-fade      : ms for fade-in / fade-out
+  */
+  .social-link a {
+    --sheen-alpha: 0.85;
+    --sheen-thickness: 1px;
+    --sheen-speed: 7s;
+    --sheen-fade: 400ms;
+    position: relative;
+    isolation: isolate;
+  }
+  .social-link a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    padding: var(--sheen-thickness);
+    opacity: 0;
+    transition: opacity var(--sheen-fade) ease;
+    background: linear-gradient(
+      115deg,
+      oklch(80% 0.16 25 / var(--sheen-alpha)),
+      oklch(82% 0.16 80 / var(--sheen-alpha)),
+      oklch(78% 0.16 145 / var(--sheen-alpha)),
+      oklch(74% 0.18 215 / var(--sheen-alpha)),
+      oklch(70% 0.20 290 / var(--sheen-alpha)),
+      oklch(80% 0.16 25 / var(--sheen-alpha))
+    ) border-box;
+    background-size: 220% 100%;
+    background-position: 0% 50%;
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+  }
+  .social-link a:hover::after {
+    opacity: 1;
+    animation: rainbow-drift var(--sheen-speed) linear infinite;
+  }
+  @keyframes rainbow-drift {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 220% 50%; }
+  }
+</style>

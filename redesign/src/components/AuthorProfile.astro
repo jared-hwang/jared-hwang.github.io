@@ -74,51 +74,9 @@ const socials = [
   </ul>
 </aside>
 
-<style is:global>
+<style>
   /* Hide the default disclosure triangle on <summary> */
   .socials-details > summary::-webkit-details-marker { display: none; }
   /* Rotate the chevron when <details> is open */
   .socials-details[open] > summary > svg { transform: rotate(180deg); }
-
-  /* Subtle rainbow sheen on hover.
-     Tunables:
-       --sheen-alpha   : per-color opacity (lower = more subtle)
-       --sheen-speed   : seconds for one full drift cycle
-       --sheen-fade    : ms for fade-in / fade-out
-  */
-  .social-link a {
-    --sheen-alpha: 0.18;
-    --sheen-speed: 7s;
-    --sheen-fade: 400ms;
-    position: relative;
-    overflow: hidden;
-    isolation: isolate;
-  }
-  .social-link a::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity var(--sheen-fade) ease;
-    background: linear-gradient(
-      115deg,
-      oklch(80% 0.16 25 / var(--sheen-alpha)),
-      oklch(82% 0.16 80 / var(--sheen-alpha)),
-      oklch(78% 0.16 145 / var(--sheen-alpha)),
-      oklch(74% 0.18 215 / var(--sheen-alpha)),
-      oklch(70% 0.20 290 / var(--sheen-alpha)),
-      oklch(80% 0.16 25 / var(--sheen-alpha))
-    );
-    background-size: 220% 100%;
-    background-position: 0% 50%;
-  }
-  .social-link a:hover::after {
-    opacity: 1;
-    animation: rainbow-drift var(--sheen-speed) linear infinite;
-  }
-  @keyframes rainbow-drift {
-    0%   { background-position: 0% 50%; }
-    100% { background-position: 220% 50%; }
-  }
 </style>

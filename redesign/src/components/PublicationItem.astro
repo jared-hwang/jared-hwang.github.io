@@ -1,0 +1,108 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  pub: CollectionEntry<"publications">;
+  compact?: boolean;
+}
+
+const { pub, compact = false } = Astro.props;
+
+type LinkSpec = { label: string; href: string };
+function linksFor(data: CollectionEntry<"publications">["data"]): LinkSpec[] {
+  const out: LinkSpec[] = [];
+  if (data.paperurl) out.push({ label: "PDF", href: data.paperurl });
+  if (data.doi) out.push({ label: "DOI", href: data.doi });
+  if (data.citation) out.push({ label: "Citation", href: data.citation });
+  if (data.code) out.push({ label: "Code", href: data.code });
+  if (data.slides) out.push({ label: "Slides", href: data.slides });
+  if (data.video) out.push({ label: "Video", href: data.video });
+  if (data.arxiv) out.push({ label: "arXiv", href: data.arxiv });
+  return out;
+}
+
+const links = linksFor(pub.data);
+---
+
+<li
+  class={
+    "publication-item flex " +
+    (compact ? "gap-3 py-3" : "gap-5 py-5")
+  }
+  data-selected={pub.data.selected ? "true" : "false"}
+>
+  <div class="shrink-0">
+    <div class={
+      "flex items-center justify-center overflow-hidden border border-neutral-200 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900 " +
+      (compact ? "h-[84px] w-16" : "h-[156px] w-[120px]")
+    }>
+      {pub.data.thumbnail ? (
+        <img
+          src={pub.data.thumbnail}
+          alt={`${pub.data.title} thumbnail`}
+          class="h-full w-full object-cover"
+        />
+      ) : (
+        <span class="text-xs text-neutral-400">PDF</span>
+      )}
+    </div>
+  </div>
+  <div class="min-w-0 flex-1">
+    <h3 class={compact ? "text-sm font-medium leading-snug" : "text-base font-medium leading-snug"}>
+      {pub.data.paperurl ? (
+        <a
+          href={pub.data.paperurl}
+          class="text-accent-700 hover:underline dark:text-accent-300"
+          set:html={pub.data.title}
+        />
+      ) : (
+        <span set:html={pub.data.title} />
+      )}
+    </h3>
+    {pub.data.authors && (
+      <p
+        class={
+          (compact ? "mt-1 text-xs" : "mt-1 text-sm") +
+          " text-neutral-600 dark:text-neutral-400 [&_b]:font-semibold"
+        }
+        set:html={pub.data.authors}
+      />
+    )}
+    {pub.data.venue && (
+      <p class={(compact ? "mt-1 text-xs" : "mt-1 text-sm") + " text-neutral-600 dark:text-neutral-400"}>
+        {pub.data.venue}
+        {pub.data.award && (
+          <span>
+            {" | "}
+            <em>{pub.data.award}</em>
+          </span>
+        )}
+        {pub.data.acceptance_rate && (
+          <span>
+            {" | Acceptance Rate: "}
+            {pub.data.acceptance_rate}
+          </span>
+        )}
+      </p>
+    )}
+    {links.length > 0 && (
+      <p class="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+        {links.map((link, i) => (
+          <>
+            {i > 0 && (
+              <span class="mx-1.5 text-neutral-300 dark:text-neutral-700">
+                |
+              </span>
+            )}
+            <a
+              href={link.href}
+              class="text-accent-700 hover:underline dark:text-accent-300"
+            >
+              {link.label}
+            </a>
+          </>
+        ))}
+      </p>
+    )}
+  </div>
+</li>

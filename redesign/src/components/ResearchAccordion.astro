@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from "astro:content";
+import PublicationItem from "./PublicationItem.astro";
 
 interface Props {
   status: "current" | "past";
@@ -8,84 +9,130 @@ interface Props {
 const { status } = Astro.props;
 
 const all = await getCollection("research");
+// End date missing means "present" — sort to the top
+const endTs = (e: (typeof all)[number]) =>
+  e.data.end_date ? e.data.end_date.getTime() : Number.MAX_SAFE_INTEGER;
+const startTs = (e: (typeof all)[number]) => e.data.start_date.getTime();
 const items = all
   .filter((e) => e.data.status === status)
-  .sort((a, b) => (a.data.date && b.data.date ? b.data.date.localeCompare(a.data.date) : 0));
+  .sort((a, b) => endTs(b) - endTs(a) || startTs(b) - startTs(a));
+
+const allPubs = (await getCollection("publications")).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
+const pubsByProject = new Map<string, typeof allPubs>();
+for (const p of allPubs) {
+  const slug = p.data.research_project;
+  if (!slug) continue;
+  if (!pubsByProject.has(slug)) pubsByProject.set(slug, []);
+  pubsByProject.get(slug)!.push(p);
+}
 
 const rendered = await Promise.all(
   items.map(async (entry) => {
     const { Content } = await render(entry);
-    return { entry, Content };
+    const pubs = pubsByProject.get(entry.id) ?? [];
+    const primary = pubs[0];
+    const primaryHref =
+      primary?.data.paperurl ?? primary?.data.doi ?? primary?.data.arxiv ?? null;
+    return { entry, Content, pubs, primaryHref };
   }),
 );
 ---
 
 <ul class="divide-y divide-neutral-200 dark:divide-neutral-800">
   {
-    rendered.map(({ entry, Content }) => (
+    rendered.map(({ entry, Content, pubs, primaryHref }) => (
       <li class="research-row group" data-expanded="false">
-        <button
-          type="button"
-          class="research-toggle flex w-full items-center gap-4 py-4 text-left transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-900/50"
+        <div
+          class="research-toggle w-full cursor-pointer transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-900/50"
+          role="button"
+          tabindex="0"
           aria-expanded="false"
         >
-          <div class="research-thumb relative shrink-0 overflow-hidden rounded-md bg-neutral-100 dark:bg-neutral-800">
-            <img
-              src={entry.data.thumbnail}
-              alt={entry.data.thumbnail_alt ?? entry.data.title}
-              class="block h-full w-full object-cover"
-            />
-          </div>
-          <div class="min-w-0 flex-1">
-            <div class="flex items-baseline gap-3">
-              <h3 class="flex-1 text-base font-medium leading-snug">
-                {entry.data.title}
-              </h3>
-              {entry.data.daterange && (
-                <span class="shrink-0 text-xs text-accent-700 dark:text-accent-300">
-                  {entry.data.daterange}
-                </span>
-              )}
-              <svg
-                class="research-chevron shrink-0 text-neutral-400 transition-transform"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
+          <div class="flex gap-5 px-2 pt-4">
+            <div class="research-thumb relative shrink-0 overflow-hidden rounded-md bg-neutral-100 dark:bg-neutral-800">
+              <img
+                src={entry.data.thumbnail}
+                alt={entry.data.thumbnail_alt ?? entry.data.title}
+                class="block h-full w-full object-cover"
+              />
             </div>
-            {entry.data.venue && (
-              <div class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-                {entry.data.venue}
+            <div class="flex min-w-0 flex-1 flex-col">
+              <div class="flex items-baseline gap-3">
+                <h3 class="flex-1 text-lg font-medium leading-snug">
+                  {entry.data.title}
+                </h3>
+                {entry.data.daterange && (
+                  <span class="shrink-0 text-sm text-accent-700 dark:text-accent-300">
+                    {entry.data.daterange}
+                  </span>
+                )}
               </div>
-            )}
-            <p
-              class="research-summary mt-1 line-clamp-2 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400"
-              set:html={entry.data.excerpt}
-            />
+              {entry.data.institution && (
+                <div class="mt-2 text-m text-neutral-600 dark:text-neutral-300">
+                  <i>{entry.data.institution}</i>
+                </div>
+              )}
+              {entry.data.venue && (
+                <div class="mt-1 text-lg text-neutral-500 dark:text-neutral-300">
+                  <i>{entry.data.venue}</i>
+                </div>
+              )}
+              {primaryHref && (
+                <div class="mt-2 text-sm">
+                  <a
+                    href={primaryHref}
+                    class="text-accent-700 hover:underline dark:text-accent-300"
+                  >
+                    🔗 Paper
+                  </a>
+                </div>
+              )}
+              {entry.data.tags.length > 0 && (
+                <div class="mt-auto flex flex-wrap gap-1.5 pt-3">
+                  {entry.data.tags.map((tag) => (
+                    <span class="rounded-full bg-accent-200 px-2.5 py-0.5 text-[11px] font-medium text-accent-900 dark:bg-accent-800/50 dark:text-accent-100">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        </button>
+          <div class="flex justify-center py-2">
+            <svg
+              class="research-chevron text-neutral-400 transition-transform"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </div>
+        </div>
 
         <div class="research-detail">
-          <div class="pb-6 pl-[calc(140px+1rem)] pr-2">
-            {entry.data.tags.length > 0 && (
-              <div class="mb-3 flex flex-wrap gap-1.5">
-                {entry.data.tags.map((tag) => (
-                  <span class="rounded-full bg-accent-100 px-2 py-0.5 text-[11px] font-medium text-accent-800 dark:bg-accent-900/40 dark:text-accent-200">
-                    {tag}
-                  </span>
-                ))}
+          <div>
+            <div class="research-detail-grid grid grid-cols-1 gap-4 px-2 pb-6 md:gap-6">
+              <div class="research-related">
+                {pubs.length > 0 && (
+                  <ul class="divide-y divide-neutral-200 dark:divide-neutral-800">
+                    {pubs.map((p) => (
+                      <PublicationItem pub={p} compact />
+                    ))}
+                  </ul>
+                )}
               </div>
-            )}
-            <div class="research-body prose-sm max-w-none text-sm leading-relaxed text-neutral-700 dark:text-neutral-300 [&_a]:text-accent-700 [&_a]:underline [&_a]:decoration-accent-600/50 [&_a:hover]:decoration-accent-700 dark:[&_a]:text-accent-300 dark:[&_a]:decoration-accent-400/60 dark:[&_a:hover]:decoration-accent-300 [&_h2]:mt-4 [&_h2]:text-base [&_h2]:font-semibold [&_h3]:mt-3 [&_h3]:text-sm [&_h3]:font-semibold [&_img]:my-3 [&_img]:rounded [&_p]:my-2 [&_strong]:font-semibold">
-              <Content />
+              <div class="research-body prose-sm max-w-none text-sm leading-relaxed text-neutral-700 dark:text-neutral-300 [&_a]:text-accent-700 [&_a]:underline [&_a]:decoration-accent-600/50 [&_a:hover]:decoration-accent-700 dark:[&_a]:text-accent-300 dark:[&_a]:decoration-accent-400/60 dark:[&_a:hover]:decoration-accent-300 [&_h2]:mt-4 [&_h2]:text-base [&_h2]:font-semibold [&_h3]:mt-3 [&_h3]:text-sm [&_h3]:font-semibold [&_img]:my-3 [&_img]:rounded [&_p]:my-2 [&_strong]:font-semibold">
+                <Content />
+              </div>
             </div>
           </div>
         </div>
@@ -96,8 +143,8 @@ const rendered = await Promise.all(
 
 <style>
   .research-thumb {
-    width: 140px;
-    height: 80px;
+    width: 320px;
+    height: 200px;
   }
   .research-detail {
     display: grid;
@@ -113,16 +160,17 @@ const rendered = await Promise.all(
   .research-row[data-expanded="true"] .research-chevron {
     transform: rotate(180deg);
   }
-  .research-row[data-expanded="true"] .research-summary {
-    display: none;
+  /* Two-column expanded layout on md+, aligned to thumb (320px) + gap from header */
+  @media (min-width: 768px) {
+    .research-detail-grid {
+      grid-template-columns: 320px 1fr;
+      column-gap: 1.25rem;
+    }
   }
   @media (max-width: 640px) {
     .research-thumb {
-      width: 96px;
-      height: 56px;
-    }
-    .research-row .research-detail > div {
-      padding-left: 0 !important;
+      width: 160px;
+      height: 100px;
     }
   }
 </style>

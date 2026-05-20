@@ -6,8 +6,10 @@ status: past
 permalink: /research/lartpc_ml/
 thumbnail: /images/research_thumbs/instancesegthumbnail.png
 thumbnail_alt: "Thumbnail of Liquid Argon Time Projection Chamber image segmentation"
-venue: "Tufts University"
+institution: "Tufts University"
 daterange: May 2020 - Sep 2021
+start_date: 2020-05-01
+end_date: 2021-09-01
 date: 09/2021
 location: "Medford, Massachusetts"
 supervisor: "Prof. Taritree Wongjirad"

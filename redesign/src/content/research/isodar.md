@@ -6,9 +6,11 @@ status: past
 permalink: /research/isodar/
 thumbnail: /images/research_thumbs/rfqthumb.png
 thumbnail_alt: "Thumbnail of RFQ simulation visualization"
-venue: "Massachusetts Institute of Technology (MIT)"
+institution: "Massachusetts Institute of Technology (MIT)"
 date: 03/2020  # end date
-daterange: Jun 2018 - March 2020 
+daterange: Jun 2018 - March 2020
+start_date: 2018-06-01
+end_date: 2020-03-01
 location: "Cambridge, Massachusetts"
 supervisor: "Prof. Janet Conrad"
 excerpt: "Developing a simulation code from the ground up for Radio Frequency Quadrupoles (RFQs). Designed to support existing simulation infrastructure, accurately simulate space-charge (interaction between charged particles), and parallelization. Faster and more scientifically accurate than existing alternatives!"

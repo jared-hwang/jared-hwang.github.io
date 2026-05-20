@@ -6,8 +6,10 @@ status: current
 permalink: /research/bikebutler/
 thumbnail: /images/research_thumbs/bikebutler.png
 thumbnail_alt: "Three different routes made using BikeButler"
-venue: "University of Washington"
+venue: "CHI '26"
+# institution: "University of Washington"
 daterange: Jan 2025 - Present
+start_date: 2025-01-01
 date: 01/2025
 location: "Seattle, WA"
 supervisor: "Prof. Jon E. Froehlich" 

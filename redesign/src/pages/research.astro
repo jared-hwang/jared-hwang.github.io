@@ -3,39 +3,41 @@ import Base from "../layouts/Base.astro";
 import ResearchAccordion from "../components/ResearchAccordion.astro";
 ---
 
-<Base title="Research" description="Research projects by Jared Hwang">
-  <h1 class="mb-2 text-2xl font-semibold tracking-tight">Research</h1>
-  <p class="mb-10 text-sm text-neutral-600 dark:text-neutral-400">
-    Click a project to expand.
-  </p>
+<Base wide title="Research" description="Research projects by Jared Hwang">
+  <div class="mx-auto max-w-5xl">
+      <h1 class="mb-2 text-2xl font-semibold tracking-tight">Research</h1>
+      <p class="mb-10 text-sm text-neutral-600 dark:text-neutral-400">
+        Click a project to expand.
+      </p>
 
-  <section class="mb-12">
-    <h2
-      class="mb-3 text-sm font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400"
-    >
-      Current
-    </h2>
-    <ResearchAccordion status="current" />
-  </section>
+      <section class="mb-12">
+        <h2
+          class="mb-3 text-sm font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400"
+        >
+          Current
+        </h2>
+        <ResearchAccordion status="current" />
+      </section>
 
-  <section>
-    <h2
-      class="mb-3 text-sm font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400"
-    >
-      Past
-    </h2>
-    <ResearchAccordion status="past" />
-  </section>
+      <section>
+        <h2
+          class="mb-3 text-sm font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400"
+        >
+          Past
+        </h2>
+        <ResearchAccordion status="past" />
+      </section>
+  </div>
 </Base>
 
 <script>
   const rows = document.querySelectorAll<HTMLElement>(".research-row");
 
   rows.forEach((row) => {
-    const toggle = row.querySelector<HTMLButtonElement>(".research-toggle");
+    const toggle = row.querySelector<HTMLElement>(".research-toggle");
     if (!toggle) return;
 
-    toggle.addEventListener("click", () => {
+    const toggleExpand = () => {
       const wasExpanded = row.dataset.expanded === "true";
 
       // Close all other rows on this page
@@ -55,6 +57,19 @@ import ResearchAccordion from "../components/ResearchAccordion.astro";
       if (!wasExpanded) {
         // Smooth-scroll the just-opened row into view
         toggle.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    };
+
+    toggle.addEventListener("click", (e) => {
+      // Let real links inside the header (e.g. Paper link) navigate normally
+      if ((e.target as HTMLElement).closest("a")) return;
+      toggleExpand();
+    });
+
+    toggle.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleExpand();
       }
     });
   });

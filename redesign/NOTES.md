@@ -59,3 +59,39 @@ Reverse-chronological. One entry per non-trivial decision or experiment.
 - Decide on typography (system stack vs. webfont)
 - Test mobile layout
 - Eventually: archive Jekyll → cut over via GitHub Actions workflow
+
+---
+
+## 2026-05-10 — Author sidebar (home only) + social buttons + rainbow border sheen
+
+**Decision:** Bring back an academicpages-style author profile sidebar **on the home page only**. Other pages stay at `max-w-3xl`, single-column.
+
+**Why:** User wanted the avatar/bio/socials prominent on the landing page without dominating research/publications views.
+
+**Tried / worked:**
+- Added `bio`, `location`, `avatar` to `SITE` in `consts.ts`. Avatar resolves to `/images/profile.jpg` via the existing public symlink.
+- New `AuthorProfile.astro` — avatar, name, bio (rendered from `SITE.description` after a user inline edit), location with map-marker SVG, and social links list. `aside`, `author-name`, `author-bio`, `author-location`, `author-avatar`, `social-link`, `social-link-{platform}` classes added as styling hooks (no rules attached by default).
+- `Base.astro` got a `wide?: boolean` prop. When true, swaps `max-w-3xl` → `max-w-6xl` on header / main / footer inner containers. Only `index.astro` opts in.
+- `index.astro` wraps existing blurb + news in a 2-col grid: `md:grid-cols-4` with `<aside>` in col-1 and content in `md:col-span-3` (1/4 + 3/4 split, sidebar sticky on desktop).
+- Social buttons styled as bordered rectangles with rounded corners, transparent background by default, accent-tinted background on hover. Icon SVG and text size consolidated to two single-knob places: parent `<ul>` `text-base` for label size, wrapper `<span>` `h-5 w-5` for icon size (each SVG uses `h-full w-full` to inherit).
+- Mobile-only "Socials" dropdown (`<details>` with `<summary>` button) so socials don't dominate the small-screen view. Desktop always shows the list.
+- Rainbow sheen on hover, restricted to the button **border** via the CSS gradient-border trick: pseudo-element with `padding: 1px` + `mask-composite: exclude` carves out the inner content-box, leaving only a 1px ring carrying the rainbow `linear-gradient`. Slow drift animation (7s cycle).
+- Extracted `SocialLink.astro` to avoid duplicating the icon-switch markup across the mobile and desktop renders.
+- Per-button tunable CSS custom properties: `--sheen-alpha`, `--sheen-thickness`, `--sheen-speed`, `--sheen-fade`. Live in `SocialLink.astro`'s scoped `<style>` block.
+
+**Didn't (and how we worked around it):**
+- **First attempt at the mobile dropdown** used a single `<details>` with `summary { md:hidden }` and a CSS `@media (min-width: 768px) { .socials-details > ul { display: block } }` override to keep the list visible on desktop. The CSS specificity was correct (verified in served output) but on real browsers the `<details>` hides non-summary children at the rendering tree level, below where author CSS can reach. Restructured to dual-render: a `<details class="md:hidden">` for mobile and a bare `<ul class="hidden md:block">` for desktop, sharing a `SocialLink.astro` sub-component to avoid duplication.
+- **`<style is:global>` HMR is unreliable** in Astro 6.3 dev server — edits to global style blocks didn't push to the browser without a server restart. Removed `is:global` and split styles to live alongside the elements they target: `.social-link` rules in `SocialLink.astro`, `.socials-details` rules in `AuthorProfile.astro`. Scoped styles hot-reload correctly.
+
+**Tunables exposed to user (live in source files, well-commented):**
+- Sidebar/content split ratio: `md:grid-cols-4` + `md:col-span-3` in `pages/index.astro`
+- Avatar size: `h-32 w-32` on `<img>` in `AuthorProfile.astro`
+- Social text size: `text-base` on parent `<ul>` in `AuthorProfile.astro`
+- Social icon size: `h-5 w-5` on wrapper `<span>` in `SocialLink.astro`
+- Social button padding/height: `py-2.5` on `<a>` in `SocialLink.astro`
+- Sheen color/speed/thickness: CSS custom properties at top of `.social-link a` in `SocialLink.astro`
+
+**Next:**
+- Typography decision (still system stack)
+- Mobile QA in real device or DevTools mobile emulation
+- Deployment cutover via GH Actions when ready

@@ -12,9 +12,9 @@ The user has minimal frontend experience — explain things accessibly when prop
 
 Pages are functional end-to-end. Content (research, publications, news) is migrated from Jekyll collections. Look-and-feel is intentionally minimal so the design can evolve. No GitHub Actions deploy workflow yet — that's deferred until ready to cut over.
 
-- `/` — blurb + news timeline
-- `/research` — accordion of current/past projects (click to expand, smooth height transition, one-open-at-a-time)
-- `/publications` — year-grouped, Selected/All toggle (defaults to Selected)
+- `/` — **wider layout** (`max-w-6xl`) with a left sidebar (`AuthorProfile`: avatar, name, bio, location, socials) at 1/4 width and blurb + news timeline at 3/4. Sidebar is sticky on desktop, stacked on mobile. Social links are full buttons on desktop and tucked behind a "Socials" `<details>` dropdown on mobile.
+- `/research` — `max-w-3xl`, single-column. Accordion of current/past projects (click to expand, smooth height transition, one-open-at-a-time).
+- `/publications` — `max-w-3xl`, single-column. Year-grouped, Selected/All toggle (defaults to Selected).
 - Dark-mode toggle in nav (sun/moon button), persists in `localStorage`, respects `prefers-color-scheme` on first visit
 
 ## Architecture
@@ -23,20 +23,25 @@ Pages are functional end-to-end. Content (research, publications, news) is migra
 redesign/
   astro.config.mjs           # Astro + Tailwind v4 vite plugin
   src/
-    consts.ts                # SITE: title, author, email, social links, nav items
+    consts.ts                # SITE: title, author, email, bio, location, avatar, social links, nav
     content.config.ts        # Zod schemas for the 3 collections
     content/
       research/*.md          # mirrors repo-root _research/, frontmatter intact (Liquid {% include %} stripped)
       publications/*.md      # mirrors repo-root _publications/, frontmatter intact
       news/*.md              # NEW collection — extracted from old _pages/about.md
     layouts/
-      Base.astro             # html shell, header (logo+nav+ThemeToggle), footer, dark-mode pre-paint script
+      Base.astro             # html shell, header, footer, dark-mode pre-paint script.
+                             # Accepts `wide?: boolean` — when true, swaps max-w-3xl → max-w-6xl on header/main/footer.
     components/
       NewsTimeline.astro     # vertical timeline reading news collection
       ResearchAccordion.astro # accordion list, expects `status: "current" | "past"` prop
       ThemeToggle.astro      # sun/moon button, toggles .dark on <html>
+      AuthorProfile.astro    # home-page sidebar: avatar + name + bio + location + socials.
+                             # Mobile shows socials behind a <details> dropdown; desktop shows them inline.
+                             # Two renders of the social list (mobile+desktop) share <SocialLink>.
+      SocialLink.astro       # one social <li> with platform icon + label + rainbow-border-sheen styles
     pages/
-      index.astro            # home: hardcoded blurb + <NewsTimeline />
+      index.astro            # home: <Base wide> + 2-col grid (md:grid-cols-4: AuthorProfile in col-1, blurb+news in col-span-3)
       research.astro         # two <ResearchAccordion> instances + accordion JS
       publications.astro     # year-grouped pubs + Selected/All toggle JS
     styles/
@@ -133,11 +138,14 @@ Create `src/pages/foo.astro`, wrap in `<Base title="Foo">`. Add to `SITE.nav` in
 - **Timezone on dates**: see content collections section above.
 - **Tailwind v4 vs v3**: see Tailwind section above. Don't suggest `tailwind.config.js`.
 - **Symlinks**: don't `rm -rf` `public/images`, `public/files`, or `public/cv_file` thinking they're local copies — they're symlinks to repo-root.
+- **`<style is:global>` HMR is broken** in the Astro 6.3 dev server — edits don't push to the browser without a full server restart. Prefer scoped `<style>` blocks. If a selector needs to reach a child component (e.g., `.social-link a` matching an `<a>` rendered in `SocialLink.astro` from a parent's style block), put the style in the child component itself.
+- **`<details>` content visibility can't be CSS-overridden reliably** — author CSS like `.foo > ul { display: block }` does NOT make a closed `<details>`'s children visible in real browsers, even at higher specificity, because the rendering engine hides them below the cascade. Don't rely on this. The mobile-socials dropdown uses dual-render (`<details class="md:hidden">` + `<ul class="hidden md:block">`) instead.
+- **Killing the dev server hard breaks the user's open browser tab.** If you must restart, send `SIGINT` (`lsof -ti:4321 | xargs kill -INT`) or just edit a file and let HMR do its thing — don't `kill` (default SIGTERM) without warning.
 
 ## Open / decided-later
 
 - **Typography** — currently system stack (Tailwind defaults). User mentioned considering a webfont but no decision yet.
-- **Width** — content area is `max-w-3xl` (~48rem). User hasn't pushed back.
+- **Width** — `/` is `max-w-6xl` (so it can fit the sidebar); `/research` and `/publications` are `max-w-3xl`. Other pages should default to `<Base>` (no `wide` prop) unless they also need a sidebar.
 - **Original "expanding thumbnail" accordion effect** — current accordion keeps thumbnail size constant and animates only the detail panel. The Jekyll version had a fancier thumbnail-grows-to-full-width animation. Re-add only if asked.
 - **Mobile QA** — basic responsive breakpoints exist but haven't been tested in a real device sweep.
 - **Deployment cutover** — plan is GitHub Actions workflow that builds `redesign/` and deploys via `actions/deploy-pages`. Switch GitHub Pages source from "Deploy from a branch" to "GitHub Actions" at cutover time. Until then the existing Jekyll deploy keeps working untouched. See the original plan file at `~/.claude/plans/i-want-to-do-snuggly-allen.md` for the full sequence.

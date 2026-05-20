@@ -6,8 +6,10 @@ status: current
 permalink: /research/accessparkcv/
 thumbnail: /images/research_thumbs/accessparkcv.jpg
 thumbnail_alt: "The AccessParkCV Pipeline"
-venue: "University of Washington"
+# institution: "University of Washington"
+venue: "ASSETS '25"
 daterange: Oct 2024 - Present
+start_date: 2024-10-01
 date: 10/2024
 location: "Seattle, WA"
 supervisor: "Prof. Jon E. Froehlich" 

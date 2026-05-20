@@ -6,8 +6,11 @@ status: past
 permalink: /research/digital_typhoon/
 thumbnail: /images/research_thumbs/typhoon_thumb.jpg
 thumbnail_alt: "Thumbnail of image of typhoon"
-venue: "National Institute of Informatics (NII)"
+# institution: "National Institute of Informatics (NII)"
+venue: "NeuRIPS '23"
 daterange: Jan 2023 - Aug 2023
+start_date: 2023-01-01
+end_date: 2023-08-01
 date: 08/2023
 location: "Tokyo, Japan"
 supervisor: "Prof. Asanobu Kitamoto" 
