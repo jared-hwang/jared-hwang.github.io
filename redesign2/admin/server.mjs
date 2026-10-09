@@ -428,7 +428,9 @@ async function saveNews(form) {
 
   let file = existing?.file;
   if (!existing) {
-    const slug = slugify(text.split(/\s+/).slice(0, 6).join(" ")) || "news";
+    // Name the file after the first few words, using a Markdown link's text rather than its URL.
+    const words = text.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1").split(/\s+/);
+    const slug = slugify(words.slice(0, 6).join(" ")) || "news";
     file = mdPath("news", `${date}-${slug}`);
     const conflict = checkFree([file]);
     if (conflict) return conflict;

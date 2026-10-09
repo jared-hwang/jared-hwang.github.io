@@ -1,0 +1,31 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Page not found">
+  <main class="not-found">
+    <h1>Page not found</h1>
+    <p>Sorry, there's nothing at this address. It may have moved when the site was redesigned.</p>
+    <p>
+      Try the <a href="/">home page</a>, or jump to <a href="/#research">research</a>,
+      <a href="/#publications">publications</a>, or <a href="/#projects">projects</a>.
+    </p>
+  </main>
+</Base>
+
+<style>
+  .not-found {
+    max-width: calc(var(--content-width) + 32px);
+    margin: 0 auto;
+    padding: 72px 16px 40px;
+    min-height: 50vh;
+  }
+  h1 {
+    font-size: 2.1rem;
+    margin: 0 0 18px;
+  }
+  p {
+    font-size: 1.02rem;
+    margin: 0 0 14px;
+  }
+</style>
