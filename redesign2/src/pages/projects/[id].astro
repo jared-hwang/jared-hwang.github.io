@@ -1,0 +1,256 @@
+---
+import { getCollection, render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import PublicationItem from "../../components/PublicationItem.astro";
+import { cropStyle, getProjects, getPublications, isVideo } from "../../lib/content";
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  return projects.map((project) => ({ params: { id: project.id }, props: { project } }));
+}
+
+const { project } = Astro.props;
+const d = project.data;
+const { Content } = await render(project);
+
+const pubs = (await getPublications()).filter((p) => p.data.research_project?.id === project.id);
+const themes = (await getCollection("themes"))
+  .filter((t) => t.data.projects.some((p) => p.id === project.id))
+  .sort((a, b) => a.data.order - b.data.order);
+
+// The page's big image: its own hero image if set, otherwise the home-page thumbnail.
+const hero = d.hero_image ?? d.thumbnail;
+const caption = d.hero_image ? d.hero_caption : d.thumbnail_alt;
+// A page image is cropped to a 16:9 frame (pan/zoom set in /admin) unless "show whole image" is on.
+// The thumbnail fallback is always shown whole, since its crop is for the small home-page tile.
+const cropped = Boolean(d.hero_image) && !d.hero_whole;
+const links = [
+  ["Website", d.website],
+  ["Code", d.code],
+  ["Video", d.video],
+].filter((l): l is [string, string] => Boolean(l[1]));
+
+const meta = [d.daterange, d.venue, d.location, d.supervisor && `with ${d.supervisor}`].filter(Boolean);
+---
+
+<Base title={d.short_title} description={d.excerpt.replace(/<[^>]+>/g, "")}>
+  <main class="project">
+    <a class="back" href="/#projects">← All projects</a>
+
+    <h1>{d.title}</h1>
+    {meta.length > 0 && <p class="meta">{meta.join(" · ")}</p>}
+
+    {
+      themes.length > 0 && (
+        <ul class="themes">
+          {themes.map((t) => (
+            <li>
+              <a href={`/#${t.id}`}>{t.data.title}</a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+
+    {
+      links.length > 0 && (
+        <ul class="links">
+          {links.map(([label, href]) => (
+            <li>
+              <a class="btn" href={href} target="_blank" rel="noopener">
+                {label} ↗
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+
+    <figure class="hero-img">
+      <div class:list={["hero-frame", { cropped }]} style={cropped ? cropStyle({ focus: d.hero_focus, zoom: d.hero_zoom }) : undefined}>
+      {
+        isVideo(hero) ? (
+          <video src={hero} autoplay muted loop playsinline aria-label={caption ?? ""} />
+        ) : (
+          <img src={hero} alt={caption ?? ""} />
+        )
+      }
+      </div>
+      {caption && <figcaption>{caption}</figcaption>}
+    </figure>
+
+    <h2 class="section-title">Overview</h2>
+    <div class="prose">
+      <Content />
+    </div>
+
+    {
+      pubs.length > 0 && (
+        <section class="pubs">
+          <h2 class="section-title">Publications</h2>
+          <div class="pub-list">
+            {pubs.map((pub) => (
+              <PublicationItem pub={pub} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      d.tags.length > 0 && (
+        <ul class="tags">
+          {d.tags.map((tag) => (
+            <li>{tag}</li>
+          ))}
+        </ul>
+      )
+    }
+  </main>
+</Base>
+
+<style>
+  .project {
+    max-width: calc(var(--content-width) + 32px);
+    margin: 0 auto;
+    padding: 36px 16px 0;
+  }
+  .back {
+    font-size: 0.9rem;
+    color: var(--ink-faint);
+    text-decoration: none;
+  }
+  .back:hover {
+    color: var(--ink);
+  }
+  h1 {
+    font-size: 2.1rem;
+    margin: 18px 0 10px;
+  }
+  .meta {
+    margin: 0 0 14px;
+    color: var(--ink-faint);
+  }
+  .themes {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .themes a {
+    display: inline-block;
+    padding: 1px 10px 4px;
+    font-size: 0.85rem;
+    color: #fff;
+    background: var(--ink);
+    text-decoration: none;
+  }
+  .themes a:hover {
+    background: var(--ink-soft);
+  }
+  .links {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .hero-img {
+    margin: 0 0 44px;
+  }
+  .hero-frame {
+    overflow: hidden;
+    border-radius: 6px;
+  }
+  /* Cropped: a fixed 16:9 frame. --focus / --zoom come from the admin's crop editor. */
+  .hero-frame.cropped {
+    aspect-ratio: 16 / 9;
+  }
+  .hero-frame.cropped img,
+  .hero-frame.cropped video {
+    height: 100%;
+    max-height: none;
+    object-fit: cover;
+    object-position: var(--focus, 50% 50%);
+    transform: scale(var(--zoom, 1));
+    transform-origin: var(--focus, 50% 50%);
+  }
+  .hero-img img,
+  .hero-img video {
+    display: block;
+    width: 100%;
+    max-height: 460px;
+    object-fit: contain;
+    background: #f6f6f6;
+    border-radius: 6px;
+  }
+  figcaption {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--ink-faint);
+  }
+  .prose {
+    font-size: 1.02rem;
+    line-height: 1.7;
+  }
+  .prose :global(img),
+  .prose :global(video) {
+    display: block;
+    max-width: 100%;
+    border-radius: 6px;
+    margin: 20px 0;
+  }
+  /* Embedded YouTube / Vimeo players (inserted from /admin). */
+  .prose :global(.video-embed) {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    margin: 20px 0;
+  }
+  .prose :global(.video-embed iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 6px;
+  }
+  .prose :global(figure) {
+    margin: 20px 0;
+  }
+  .prose :global(figure > img),
+  .prose :global(figure > video) {
+    margin: 0;
+  }
+  .prose :global(figcaption) {
+    margin-top: 8px;
+  }
+  .prose :global(h2),
+  .prose :global(h3) {
+    margin: 32px 0 12px;
+  }
+  .pubs {
+    margin-top: 56px;
+  }
+  .pub-list {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+  .tags {
+    list-style: none;
+    padding: 0;
+    margin: 56px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .tags li {
+    font-size: 0.8rem;
+    padding: 0 8px 3px;
+    border: 1px solid var(--rule);
+    color: var(--ink-faint);
+  }
+</style>

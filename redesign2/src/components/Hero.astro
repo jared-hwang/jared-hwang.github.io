@@ -1,0 +1,115 @@
+---
+import { render } from "astro:content";
+import Icon from "./Icon.astro";
+import { cropStyle, getProfile } from "../lib/content";
+
+// Edit the intro in /admin (Profile tab) or src/content/profile/profile.md.
+const profile = await getProfile();
+const d = profile.data;
+const { Content } = await render(profile);
+---
+
+<section class="hero">
+  <span class="photo" style={cropStyle(d)}>
+    <img src={d.photo} alt={d.photo_alt ?? ""} width="256" height="303" />
+  </span>
+  <div class="intro">
+    <h1>{d.heading}</h1>
+    <div class="intro-text">
+      <Content />
+
+      <div class="actions">
+        <a class="btn cv" href={d.cv} target="_blank" rel="noopener">CV</a>
+        <ul class="socials">
+          <li><a href={`mailto:${d.email}`}><Icon name="email" />Email</a></li>
+          {d.linkedin && <li><a href={d.linkedin} target="_blank" rel="noopener"><Icon name="linkedin" />LinkedIn</a></li>}
+          {d.scholar && <li><a href={d.scholar} target="_blank" rel="noopener"><Icon name="scholar" />Google Scholar</a></li>}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: 256px 1fr;
+    gap: 26px;
+  }
+  /* Clips the zoomed photo. --focus / --zoom come from the admin's crop editor. */
+  .photo {
+    display: block;
+    width: 256px;
+    height: 303px;
+    overflow: hidden;
+  }
+  .photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--focus, 50% 50%);
+    transform: scale(var(--zoom, 1));
+    transform-origin: var(--focus, 50% 50%);
+  }
+  h1 {
+    font-size: 2.3rem;
+    margin: 18px 0 18px;
+  }
+  .intro-text {
+    padding-left: 36px;
+    font-size: 1.02rem;
+  }
+  .intro-text :global(p) {
+    margin: 0 0 22px;
+  }
+  .intro-text :global(p a) {
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 22px;
+  }
+  .cv {
+    border-width: 2.5px;
+    font-size: 1.15rem;
+    padding: 3px 28px 7px;
+  }
+  .socials {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+  }
+  .socials a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.82rem;
+    text-decoration: none;
+    color: var(--ink-soft);
+    transition: color 0.15s;
+  }
+  .socials a:hover {
+    color: var(--ink);
+  }
+
+  @media (max-width: 720px) {
+    .hero {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+    .photo {
+      width: 180px;
+      height: 213px;
+    }
+    .intro-text {
+      padding-left: 0;
+    }
+  }
+</style>

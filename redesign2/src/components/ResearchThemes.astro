@@ -1,0 +1,304 @@
+---
+import { getCollection, getEntries, render } from "astro:content";
+import Icon from "./Icon.astro";
+import { cropStyle, getPublications, paperLink } from "../lib/content";
+
+const themes = (await getCollection("themes")).sort((a, b) => a.data.order - b.data.order);
+const allPubs = await getPublications();
+
+const panels = await Promise.all(
+  themes.map(async (theme) => ({
+    theme,
+    Blurb: (await render(theme)).Content,
+    projects: await getEntries(theme.data.projects),
+    pubs: allPubs.filter((p) => p.data.themes.some((t) => t.id === theme.id)),
+  })),
+);
+---
+
+<section id="research" class="themes">
+  <h2 class="section-title">Research Themes</h2>
+
+  <!-- Each tile is followed by its panel. On desktop the tiles share the top
+       row and panels span the full width below; on mobile everything stacks,
+       so a panel opens right under its own tile. -->
+  <div class="tiles">
+    {
+      panels.map(({ theme, Blurb, projects, pubs }, i) => (
+        <>
+          <button
+            type="button"
+            class="tile"
+            id={theme.id}
+            aria-expanded="false"
+            aria-controls={`panel-${theme.id}`}
+            style={`--img: url('${theme.data.image}'); --col: ${i + 1}; ${cropStyle(theme.data)}`}
+          >
+            <span class="tile-title">{theme.data.title}</span>
+            <span class="tile-hint" aria-hidden="true">+</span>
+            <span class="tile-bar" aria-hidden="true" />
+          </button>
+          <div class="theme-panel" id={`panel-${theme.id}`} role="region" aria-labelledby={theme.id}>
+            <div class="theme-panel-inner">
+              <div class="theme-panel-content">
+                <div class="blurb">
+                  <Blurb />
+                </div>
+
+                {projects.length > 0 && (
+                  <div class="panel-block">
+                    <h3>Projects</h3>
+                    <ul class="chips">
+                      {projects.map((p) => (
+                        <li>
+                          <a href={`/projects/${p.id}`}>
+                            {p.data.short_title} <Icon name="arrow" size={14} />
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {pubs.length > 0 && (
+                  <div class="panel-block">
+                    <h3>Publications</h3>
+                    <ul class="mini-pubs">
+                      {pubs.map((p) => (
+                        <li>
+                          <a href={paperLink(p)} target="_blank" rel="noopener" set:html={p.data.title} />
+                          <span class="mini-venue">
+                            {p.data.venue_short ?? p.data.venue ?? p.data.date.getUTCFullYear()}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .themes {
+    margin-top: 64px;
+  }
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .tile {
+    grid-row: 1;
+    grid-column: var(--col);
+    position: relative;
+    height: 194px;
+    padding: 14px 16px;
+    border: 0;
+    margin: 0;
+    font: inherit;
+    text-align: left;
+    color: #fff;
+    cursor: pointer;
+    overflow: hidden;
+    background: #3a3a3a;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+  /* Image layer + dark gradient so the title is always readable. */
+  .tile::before,
+  .tile::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transition: transform 0.4s ease, filter 0.3s ease;
+  }
+  .tile::before {
+    /* --focus / --zoom come from the admin's crop editor. */
+    background: var(--img) var(--focus, 50% 50%) / cover no-repeat;
+    transform: scale(var(--zoom, 1));
+    transform-origin: var(--focus, 50% 50%);
+  }
+  .tile::after {
+    /* Matches the Figma mockup: solid #444 for the top 20% (behind the title),
+       fading to transparent #737373 by 60%, so the rest of the image is uncovered. */
+    background: linear-gradient(to bottom, #444 0%, #444 20%, rgb(115 115 115 / 0) 60%);
+  }
+  .tile:hover::before {
+    transform: scale(calc(var(--zoom, 1) * 1.04));
+  }
+  .tile-title,
+  .tile-hint {
+    position: relative;
+    z-index: 1;
+  }
+  .tile-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    line-height: 1.55;
+    max-width: 11em;
+  }
+  .tile-hint {
+    font-size: 1.5rem;
+    line-height: 1;
+    font-weight: 300;
+    transition: transform 0.25s;
+  }
+  .tile[aria-expanded="true"] .tile-hint {
+    transform: rotate(45deg);
+  }
+  /* While one theme is open, gently fade the others' images (hovering restores them). */
+  .tiles:has(.tile[aria-expanded="true"]) .tile[aria-expanded="false"]::before {
+    filter: brightness(0.7) saturate(0.6);
+  }
+  .tiles:has(.tile[aria-expanded="true"]) .tile[aria-expanded="false"]:hover::before {
+    filter: none;
+  }
+  /* Bar along the bottom of the open tile, tying it to the panel below. */
+  .tile-bar {
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 4px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  .tile[aria-expanded="true"] .tile-bar {
+    transform: scaleX(1);
+  }
+
+  /* Expand/collapse: animate grid row from 0fr to 1fr. */
+  .theme-panel {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s ease;
+  }
+  .theme-panel.is-open {
+    grid-template-rows: 1fr;
+  }
+  .theme-panel-inner {
+    overflow: hidden;
+  }
+  .theme-panel-content {
+    position: relative;
+    padding: 22px 18px 26px;
+  }
+  /* Bottom-left corner bracket marking the end of the expanded panel:
+     a vertical line fading in from the top, and a horizontal one fading out to the right. */
+  .theme-panel-content::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 180px;
+    height: 90px;
+    pointer-events: none;
+    background:
+      linear-gradient(to bottom, transparent, var(--ink)) left bottom / 2px 100% no-repeat,
+      linear-gradient(to right, var(--ink), transparent) left bottom / 100% 2px no-repeat;
+  }
+  .blurb {
+    color: var(--ink-soft);
+  }
+  .blurb :global(p) {
+    margin: 0 0 12px;
+  }
+  .panel-block {
+    margin-top: 16px;
+  }
+  .panel-block h3 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+    margin-bottom: 8px;
+  }
+  .chips {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .chips a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 10px 5px;
+    border: 1.5px solid var(--ink);
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+  }
+  .chips a:hover {
+    background: var(--ink);
+    color: var(--bg);
+  }
+  .mini-pubs {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .mini-pubs li {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 6px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .mini-pubs a {
+    text-decoration: none;
+  }
+  .mini-pubs a:hover {
+    text-decoration: underline;
+  }
+  .mini-venue {
+    flex-shrink: 0;
+    font-size: 0.85rem;
+    color: var(--ink-faint);
+  }
+
+  @media (max-width: 720px) {
+    .tiles {
+      grid-template-columns: 1fr;
+    }
+    .tile {
+      grid-row: auto;
+      grid-column: 1;
+      height: 150px;
+    }
+  }
+</style>
+
+<script>
+  const tiles = document.querySelectorAll<HTMLButtonElement>(".themes .tile");
+
+  function setOpen(tile: HTMLButtonElement, open: boolean) {
+    tile.setAttribute("aria-expanded", String(open));
+    document.getElementById(tile.getAttribute("aria-controls")!)!.classList.toggle("is-open", open);
+  }
+
+  // One theme open at a time; clicking the open one closes it.
+  for (const tile of tiles) {
+    tile.addEventListener("click", () => {
+      const willOpen = tile.getAttribute("aria-expanded") !== "true";
+      for (const t of tiles) setOpen(t, t === tile && willOpen);
+    });
+  }
+
+  // Links like /#city-scale-urban-analysis (used on project pages) open that theme.
+  const fromHash = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  if (fromHash instanceof HTMLButtonElement && fromHash.classList.contains("tile")) {
+    setOpen(fromHash, true);
+  }
+</script>

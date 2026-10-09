@@ -1,0 +1,195 @@
+---
+import { getCollection, render } from "astro:content";
+
+const news = (await getCollection("news")).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+const items = await Promise.all(
+  news.map(async (n) => ({ entry: n, Content: (await render(n)).Content })),
+);
+const pad2 = (n: number) => String(n).padStart(2, "0");
+---
+
+<!--
+  Desktop: a vertical timeline the height of the page. Each item is placed by
+  date — newest at the top, oldest near the bottom (see the script below).
+  Mobile: a plain list showing the latest few, with a button for the rest.
+-->
+<aside class="news" aria-labelledby="news-heading">
+  <h2 id="news-heading" class="news-heading">News!</h2>
+  <ol class="news-track">
+    {
+      items.map(({ entry, Content }) => (
+        <li class="news-item" data-time={entry.data.date.valueOf()}>
+          <time class="news-date" datetime={entry.data.date.toISOString().slice(0, 10)}>
+            <span>{pad2(entry.data.date.getUTCMonth() + 1)}</span>
+            <span>{pad2(entry.data.date.getUTCFullYear() % 100)}</span>
+          </time>
+          <div class="news-text">
+            <Content />
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+  {items.length > 3 && <button type="button" class="news-more">Show older news</button>}
+</aside>
+
+<style>
+  .news {
+    --line-x: 46px; /* where the vertical line sits */
+    position: relative;
+    padding-top: 40px;
+  }
+  /* The vertical line. */
+  .news::before {
+    content: "";
+    position: absolute;
+    left: var(--line-x);
+    top: 44px;
+    bottom: 0;
+    width: 1.5px;
+    background: var(--ink-soft);
+  }
+  .news-heading {
+    width: var(--line-x);
+    padding-right: 6px;
+    text-align: right;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+  .news-track {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: relative;
+  }
+  .news-item {
+    display: grid;
+    grid-template-columns: var(--line-x) 1fr;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+  /* Laid out by the script on wide screens. */
+  .news.is-positioned .news-item {
+    position: absolute;
+    left: 0;
+    right: 0;
+  }
+  .news-date {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding-right: 8px;
+    font-size: 0.85rem;
+    line-height: 1.15;
+    color: var(--ink-soft);
+  }
+  .news-date span:first-child {
+    border-bottom: 1px solid currentColor;
+  }
+  .news-text {
+    padding-left: 8px;
+    padding-top: 1px;
+  }
+  .news-text :global(p) {
+    margin: 0;
+  }
+  .news-text :global(strong) {
+    font-weight: 600;
+  }
+  .news-more {
+    display: none;
+  }
+
+  @media (max-width: 960px) {
+    /* On small screens, news moves below the main content. */
+    .news {
+      order: 1;
+      padding-top: 0;
+      margin-top: 72px;
+    }
+    .news::before {
+      top: 30px;
+    }
+    .news-heading {
+      margin-bottom: 10px;
+    }
+    .news-track {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .news-item {
+      font-size: 0.9rem;
+    }
+    .news:not(.show-all) .news-item:nth-child(n + 4) {
+      display: none;
+    }
+    .news-more {
+      display: block;
+      margin: 14px 0 0 calc(var(--line-x) + 8px);
+      padding: 0;
+      border: 0;
+      background: none;
+      font: inherit;
+      font-size: 0.9rem;
+      text-decoration: underline;
+      cursor: pointer;
+      color: var(--ink-soft);
+    }
+  }
+</style>
+
+<script>
+  const news = document.querySelector<HTMLElement>(".news")!;
+  const track = news.querySelector<HTMLElement>(".news-track")!;
+  const items = [...track.querySelectorAll<HTMLElement>(".news-item")];
+  const main = document.querySelector<HTMLElement>("[data-news-span]")!;
+  const wide = window.matchMedia("(min-width: 961px)");
+
+  const TOP_GAP = 60; // space above the newest item
+  const BOTTOM_GAP = 140; // the oldest item sits this far up from the bottom
+  const MIN_SPACING = 18; // minimum vertical space between items
+
+  function layout() {
+    if (!wide.matches) {
+      news.classList.remove("is-positioned");
+      track.style.height = "";
+      return;
+    }
+    news.classList.add("is-positioned");
+
+    // Height of the page content, ignoring any expanded research theme, so
+    // items don't move when a theme opens.
+    let expanded = 0;
+    for (const panel of main.querySelectorAll<HTMLElement>(".theme-panel")) expanded += panel.offsetHeight;
+    const height = main.getBoundingClientRect().bottom - track.getBoundingClientRect().top - expanded;
+    track.style.height = `${height}px`;
+
+    const times = items.map((el) => Number(el.dataset.time));
+    const newest = Math.max(...times);
+    const oldest = Math.min(...times);
+    const span = newest - oldest || 1;
+    const usable = Math.max(height - TOP_GAP - BOTTOM_GAP, 0);
+
+    // Place by date, then push down anything that would overlap the item above.
+    let prevBottom = -Infinity;
+    for (const el of items) {
+      const ideal = TOP_GAP + ((newest - Number(el.dataset.time)) / span) * usable;
+      const top = Math.max(ideal, prevBottom + MIN_SPACING);
+      el.style.top = `${top}px`;
+      prevBottom = top + el.offsetHeight;
+    }
+  }
+
+  new ResizeObserver(layout).observe(main);
+  wide.addEventListener("change", layout);
+  layout();
+
+  news.querySelector(".news-more")?.addEventListener("click", (e) => {
+    const showAll = news.classList.toggle("show-all");
+    (e.currentTarget as HTMLElement).textContent = showAll ? "Show less" : "Show older news";
+  });
+</script>

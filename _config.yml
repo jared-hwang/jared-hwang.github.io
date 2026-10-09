@@ -148,6 +148,7 @@ exclude:
   - tmp
   - vendor
   - redesign
+  - redesign2
 keep_files:
   - .git
   - .svn

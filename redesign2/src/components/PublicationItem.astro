@@ -1,0 +1,140 @@
+---
+import Icon from "./Icon.astro";
+import { cropStyle, paperLink, type Publication } from "../lib/content";
+
+interface Props {
+  pub: Publication;
+}
+const { pub } = Astro.props;
+const d = pub.data;
+const link = paperLink(pub);
+const venueLabel = d.venue_short ?? d.venue;
+// An asterisk after any author name marks equal authorship.
+const equalAuthors = d.authors?.includes("*");
+---
+
+<article class="pub" data-selected={d.selected ? "true" : "false"}>
+  {
+    d.thumbnail && (
+      <a class="pub-thumb" href={link} target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+        <span class="pub-thumb-crop" style={cropStyle(d)}>
+          <img src={d.thumbnail} alt="" loading="lazy" />
+        </span>
+        {d.trophy && <span class="trophy" title={d.award}>🏆</span>}
+      </a>
+    )
+  }
+  <div class="pub-body">
+    <h3 class="pub-title">
+      {link ? <a href={link} target="_blank" rel="noopener" set:html={d.title} /> : <span set:html={d.title} />}
+    </h3>
+    {d.authors && <p class="pub-authors" set:html={d.authors} />}
+    {equalAuthors && <p class="pub-note">* denotes equal authorship</p>}
+    <div class="pub-links">
+      {venueLabel && <span class="btn btn--solid pub-venue" title={d.venue}>{venueLabel}</span>}
+      {d.award && <span class="pub-award">{d.award}</span>}
+      {d.pdf && <a class="btn" href={d.pdf} target="_blank" rel="noopener"><Icon name="pdf" size={15} />PDF</a>}
+      {d.doi && <a class="btn" href={d.doi} target="_blank" rel="noopener">doi</a>}
+      {d.code && <a class="btn" href={d.code} target="_blank" rel="noopener">code</a>}
+      {d.video && <a class="btn" href={d.video} target="_blank" rel="noopener">video</a>}
+      {d.slides && <a class="btn" href={d.slides} target="_blank" rel="noopener">slides</a>}
+    </div>
+  </div>
+</article>
+
+<style>
+  .pub {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 12px;
+    align-items: start;
+  }
+  .pub-thumb {
+    position: relative;
+    display: block;
+    border: 1px solid #bbb;
+    background: #fafafa;
+    transition: box-shadow 0.15s, transform 0.15s;
+  }
+  .pub-thumb:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgb(0 0 0 / 0.12);
+  }
+  /* Award badge, overlapping the thumbnail's top-left corner. */
+  .trophy {
+    position: absolute;
+    top: -7px;
+    left: -10px;
+    font-size: 22px;
+    line-height: 1;
+  }
+  /* Clips the zoomed image (the trophy sits outside it). --focus / --zoom come from the admin. */
+  .pub-thumb-crop {
+    display: block;
+    overflow: hidden;
+  }
+  .pub-thumb img {
+    width: 100%;
+    aspect-ratio: 8.5 / 11;
+    object-fit: cover;
+    object-position: var(--focus, 50% 0%);
+    transform: scale(var(--zoom, 1));
+    transform-origin: var(--focus, 50% 0%);
+  }
+  .pub-title {
+    font-size: 1.05rem;
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+  .pub-title a {
+    text-decoration: none;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.25s;
+  }
+  .pub-title a:hover {
+    background-size: 100% 1px;
+  }
+  .pub-authors {
+    margin: 0 0 12px;
+    font-size: 0.93rem;
+    color: var(--ink-soft);
+  }
+  .pub-note {
+    margin: -10px 0 12px;
+    font-size: 0.8rem;
+    font-style: italic;
+    color: var(--ink-faint);
+  }
+  .pub-authors :global(b) {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .pub-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+  .pub-venue {
+    cursor: default;
+  }
+  .pub-award {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+  }
+
+  @media (max-width: 560px) {
+    .pub {
+      grid-template-columns: 72px 1fr;
+    }
+    .pub-links {
+      gap: 8px;
+    }
+  }
+</style>

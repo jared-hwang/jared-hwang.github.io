@@ -1,0 +1,1077 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Site Admin</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Vadodara:wght@400;500;600&display=swap" />
+    <style>
+      :root {
+        --ink: #111;
+        --soft: #555;
+        --faint: #888;
+        --rule: #e4e4e4;
+        --accent: #0b63ce;
+        --ok: #1d7a3a;
+        --err: #b42318;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Hind Vadodara", system-ui, sans-serif;
+        color: var(--ink);
+        background: #fafafa;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 28px 10px;
+        background: #fff;
+        border-bottom: 1px solid var(--rule);
+      }
+      header h1 { margin: 0; font-size: 1.2rem; font-weight: 500; }
+      header a { color: var(--soft); font-size: 0.9rem; }
+      .wrap { max-width: 820px; margin: 0 auto; padding: 28px 16px 80px; }
+      .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+      .tabs button {
+        font: inherit;
+        font-size: 1rem;
+        padding: 4px 14px 7px;
+        border: 2px solid var(--accent);
+        border-radius: 4px;
+        background: #fff;
+        color: var(--accent);
+        cursor: pointer;
+      }
+      .tabs button[aria-selected="true"] { background: var(--accent); color: #fff; }
+      .panel { display: none; }
+      .panel.active { display: grid; gap: 20px; }
+
+      /* ── Existing entries list ── */
+      .entries {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        background: #fff;
+        border: 1px solid var(--rule);
+        max-height: 320px;
+        overflow-y: auto;
+      }
+      .entries li {
+        display: grid;
+        grid-template-columns: 92px 1fr auto;
+        gap: 12px;
+        align-items: center;
+        padding: 7px 12px 5px;
+        border-top: 1px solid var(--rule);
+        font-size: 0.9rem;
+      }
+      .entries li:first-child { border-top: 0; }
+      .entries li.is-editing { background: #eef4fd; }
+      .entries .date { color: var(--faint); font-variant-numeric: tabular-nums; }
+      .entries .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .entries .note { color: var(--faint); margin-left: 6px; }
+      .entries .actions { display: flex; gap: 6px; }
+      .entries button, .ghost {
+        font: inherit;
+        font-size: 0.82rem;
+        padding: 1px 9px 3px;
+        border: 1px solid #bbb;
+        background: #fff;
+        cursor: pointer;
+      }
+      .entries button:hover, .ghost:hover { border-color: var(--ink); }
+      .entries button.delete:hover { border-color: var(--err); color: var(--err); }
+      /* Edit-only forms (themes) show just their heading until an entry is picked. */
+      form[data-edit-only]:not(.editing) > :not(.form-head) { display: none; }
+      .current img.wide { max-height: 110px; aspect-ratio: auto; }
+      .list-head { display: flex; justify-content: space-between; align-items: end; margin-bottom: -12px; }
+      .list-head h2, .form-head h2 { margin: 0; font-size: 1.05rem; font-weight: 500; }
+
+      /* ── Forms ── */
+      form {
+        display: grid;
+        gap: 16px;
+        background: #fff;
+        border: 1px solid var(--rule);
+        padding: 24px;
+      }
+      form.editing { border: 2px solid var(--accent); }
+      form:not(.editing) [data-mode="edit"],
+      form.editing [data-mode="new"] { display: none; }
+      .form-head { display: flex; justify-content: space-between; align-items: center; }
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      label { display: grid; gap: 4px; font-size: 0.9rem; font-weight: 500; }
+      label small, .hint { font-weight: 400; color: var(--faint); font-size: 0.8rem; }
+      input[type="text"], input[type="number"], input[type="date"], input[type="month"], textarea, select {
+        font: inherit;
+        font-size: 0.95rem;
+        padding: 6px 8px 4px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        width: 100%;
+      }
+      input[readonly] { background: #f3f3f3; color: var(--soft); }
+      textarea { min-height: 90px; resize: vertical; }
+      fieldset { border: 1px solid var(--rule); padding: 10px 14px 12px; margin: 0; }
+      legend { font-size: 0.9rem; font-weight: 500; padding: 0 4px; }
+      .checks { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+      .checks label, .inline { display: flex; align-items: center; gap: 6px; font-weight: 400; }
+      .drop {
+        border: 2px dashed #ccc;
+        padding: 14px;
+        text-align: center;
+        background: #fcfcfc;
+      }
+      .drop.over { border-color: var(--accent); background: #eef4fd; }
+      .preview { max-height: 120px; margin: 8px auto 0; display: block; }
+      .row.three { grid-template-columns: 1fr 1fr 1fr; }
+      fieldset.stack { display: grid; gap: 12px; }
+      .body-editor { display: grid; gap: 6px; }
+      .body-editor > label { font-size: 0.9rem; font-weight: 500; }
+      .toolbar { display: flex; flex-wrap: wrap; gap: 6px; }
+      .equal { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin-top: -8px; }
+      .equal[hidden] { display: none; }
+      .crop { display: grid; gap: 10px; padding: 12px 14px; border: 1px solid var(--rule); background: #fcfcfc; }
+      .crop[hidden], .crop.off { display: none; }
+      .crop-frames { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-end; }
+      .crop-frame { display: grid; gap: 4px; }
+      .crop-box {
+        position: relative;
+        overflow: hidden;
+        max-width: 100%;
+        background: #e9e9e9;
+        border: 1px solid #ccc;
+        cursor: grab;
+        touch-action: none;
+      }
+      .crop-box.dragging { cursor: grabbing; }
+      /* Same rules the site uses, so the preview is exact. */
+      .crop-box img, .crop-box video {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: var(--focus);
+        transform: scale(var(--zoom));
+        transform-origin: var(--focus);
+        pointer-events: none;
+        user-select: none;
+      }
+      .crop-controls { display: flex; gap: 16px; align-items: center; }
+      .crop-controls input[type="range"] { width: 180px; }
+      .current { font-size: 0.85rem; color: var(--soft); display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+      .current img { max-height: 90px; border: 1px solid var(--rule); }
+      details summary { cursor: pointer; font-size: 0.9rem; color: var(--soft); }
+      details[open] { display: grid; gap: 16px; }
+      button.submit {
+        justify-self: start;
+        font: inherit;
+        font-size: 1rem;
+        padding: 4px 22px 7px;
+        border: 2px solid var(--ink);
+        background: var(--ink);
+        color: #fff;
+        cursor: pointer;
+      }
+      button.submit:disabled { opacity: 0.5; cursor: wait; }
+      .result { white-space: pre-wrap; font-size: 0.9rem; padding: 12px 14px; display: none; }
+      .result.ok { display: block; background: #edf7f0; color: var(--ok); }
+      .result.err { display: block; background: #fdf0ef; color: var(--err); }
+      .result a { color: inherit; }
+      @media (max-width: 600px) {
+        .row, .row.three { grid-template-columns: 1fr; }
+        .entries li { grid-template-columns: 1fr auto; }
+        .entries .date { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Site Admin <span class="hint">(local only, never deployed)</span></h1>
+      <a href="/" target="_blank">View site ↗</a>
+    </header>
+
+    <div class="wrap">
+      <div class="tabs" role="tablist">
+        <button role="tab" data-tab="publications" aria-selected="true">Publications</button>
+        <button role="tab" data-tab="projects" aria-selected="false">Projects</button>
+        <button role="tab" data-tab="news" aria-selected="false">News</button>
+        <button role="tab" data-tab="themes" aria-selected="false">Research Themes</button>
+        <button role="tab" data-tab="profile" aria-selected="false">Home Intro</button>
+      </div>
+
+      <!-- ───────────── Publications ───────────── -->
+      <section class="panel active" data-type="publications">
+        <div class="list-head"><h2>Existing publications</h2></div>
+        <ul class="entries"></ul>
+        <div class="result" data-list-result role="status"></div>
+
+        <form data-endpoint="/admin/api/publication" data-body="abstract" data-noun="publication">
+          <input type="hidden" name="_edit" />
+          <div class="form-head">
+            <h2 data-form-title>New publication</h2>
+            <button type="button" class="ghost" data-mode="edit" data-cancel>Cancel editing</button>
+          </div>
+          <label>Title <input type="text" name="title" required /></label>
+          <label>
+            Authors <small>(comma separated; your name is bolded automatically)</small>
+            <input type="text" name="authors" required placeholder="Jared Hwang, Jon E. Froehlich" />
+          </label>
+          <div class="equal" data-equal hidden>
+            <span class="hint">Equal authorship (adds *):</span>
+            <span class="checks" data-equal-list></span>
+          </div>
+          <div class="row">
+            <label>Publication date <input type="date" name="date" required /></label>
+            <label>Id <small>(used for file names)</small><input type="text" name="id" required pattern="[a-z0-9]+(-[a-z0-9]+)*" /></label>
+          </div>
+          <div class="row">
+            <label>Venue (full) <input type="text" name="venue" placeholder="CHI ’26" /></label>
+            <label>Venue badge <small>(short, on the black label)</small><input type="text" name="venue_short" placeholder="ACM CHI 26" /></label>
+          </div>
+
+          <div class="current" data-mode="edit" data-current></div>
+          <div class="drop">
+            <label><span data-mode="new">PDF <small>(drag a file here; a thumbnail is made from page 1)</small></span>
+              <span data-mode="edit">Replace PDF <small>(optional)</small></span>
+              <input type="file" name="pdf" accept="application/pdf" />
+            </label>
+          </div>
+          <label class="inline" data-mode="edit"><input type="checkbox" name="regen_thumb" /> Regenerate the thumbnail from the PDF</label>
+          <div class="crop" data-crop data-default-focus="50% 0%" data-file="thumbnail" data-key="thumbnail" data-frames="Publication thumbnail:120x155" hidden>
+            <input type="hidden" name="focus" data-crop-focus /><input type="hidden" name="zoom" data-crop-zoom />
+            <span class="hint">Crop: drag the image to reposition it, and use the slider to zoom. Previews match the site.</span>
+            <div class="crop-frames"></div>
+            <div class="crop-controls">
+              <label class="inline">Zoom <input type="range" min="1" max="3" step="0.05" value="1" data-zoom /></label>
+              <button type="button" class="ghost" data-crop-reset>Reset crop</button>
+            </div>
+          </div>
+
+          <label class="inline"><input type="checkbox" name="selected" /> Show under “Selected Publications”</label>
+
+          <label>Award <small>(optional label next to the venue; pick one or type your own)</small>
+            <input type="text" name="award" list="award-options" />
+            <datalist id="award-options">
+              <option value="Best Paper"></option>
+              <option value="Honorable Mention"></option>
+              <option value="Best Paper Nominee"></option>
+              <option value="Spotlight"></option>
+            </datalist>
+          </label>
+          <label class="inline"><input type="checkbox" name="trophy" /> Show 🏆 on the thumbnail</label>
+
+          <fieldset>
+            <legend>Research themes</legend>
+            <div class="checks" data-themes></div>
+          </fieldset>
+
+          <label>Project
+            <select name="research_project" data-projects><option value="">(none)</option></select>
+          </label>
+
+          <div class="row">
+            <label>DOI link <input type="text" name="doi" /></label>
+            <label>Code link <input type="text" name="code" /></label>
+          </div>
+          <div class="row">
+            <label>Video link <input type="text" name="video" /></label>
+            <label>Slides link <input type="text" name="slides" /></label>
+          </div>
+
+          <details>
+            <summary>More options</summary>
+            <div class="drop">
+              <label>Custom thumbnail <small>(optional; overrides the one made from the PDF)</small>
+                <input type="file" name="thumbnail" accept="image/*" />
+              </label>
+            </div>
+            <label>arXiv link <input type="text" name="arxiv" /></label>
+            <label>Abstract <textarea name="abstract"></textarea></label>
+          </details>
+
+          <label data-mode="new">Also post a news item <small>(optional; Markdown is fine, uses the publication date)</small>
+            <textarea name="news_text" placeholder="Our paper on … was accepted to **CHI ’26**!"></textarea>
+          </label>
+
+          <button class="submit" type="submit" data-submit>Add publication</button>
+          <div class="result" role="status"></div>
+        </form>
+      </section>
+
+      <!-- ───────────── Projects ───────────── -->
+      <section class="panel" data-type="projects">
+        <div class="list-head"><h2>Existing projects</h2></div>
+        <ul class="entries"></ul>
+        <div class="result" data-list-result role="status"></div>
+
+        <form data-endpoint="/admin/api/project" data-body="body" data-noun="project">
+          <input type="hidden" name="_edit" />
+          <div class="form-head">
+            <h2 data-form-title>New project</h2>
+            <button type="button" class="ghost" data-mode="edit" data-cancel>Cancel editing</button>
+          </div>
+          <label>Full title <input type="text" name="title" required placeholder="BikeButler: Creating and Previewing Personalized Bicycle Routes" /></label>
+          <div class="row">
+            <label>Short title <small>(shown under the tile)</small><input type="text" name="short_title" required /></label>
+            <label>Id <small>(the URL: /projects/&lt;id&gt;)</small><input type="text" name="id" required pattern="[a-z0-9]+(-[a-z0-9]+)*" /></label>
+          </div>
+          <div class="row">
+            <label>Start <small>(only the month and year are used)</small><input type="date" name="start_date" required data-no-default /></label>
+            <label>End <small>(leave empty if ongoing)</small><input type="date" name="end_date" data-no-default /></label>
+          </div>
+
+          <div class="current" data-mode="edit" data-current></div>
+          <div class="drop">
+            <label><span data-mode="new">Thumbnail image <small>(the home-page tile, ~3:2)</small></span>
+              <span data-mode="edit">Replace thumbnail <small>(optional)</small></span>
+              <input type="file" name="thumbnail" accept="image/*" data-required-when-new />
+            </label>
+          </div>
+          <div class="crop" data-crop data-default-focus="50% 50%" data-file="thumbnail" data-key="thumbnail" data-frames="Home-page tile:225x148" hidden>
+            <input type="hidden" name="focus" data-crop-focus /><input type="hidden" name="zoom" data-crop-zoom />
+            <span class="hint">Crop: drag the image to reposition it, and use the slider to zoom. Previews match the site.</span>
+            <div class="crop-frames"></div>
+            <div class="crop-controls">
+              <label class="inline">Zoom <input type="range" min="1" max="3" step="0.05" value="1" data-zoom /></label>
+              <button type="button" class="ghost" data-crop-reset>Reset crop</button>
+            </div>
+          </div>
+          <label>Thumbnail caption / alt text <input type="text" name="thumbnail_alt" /></label>
+
+          <label>Excerpt <small>(one or two sentences)</small><textarea name="excerpt" required></textarea></label>
+
+          <fieldset class="stack">
+            <legend>Project page image <small class="hint">(the big image at the top of /projects/&lt;id&gt;; if empty, the thumbnail is used)</small></legend>
+            <div class="current" data-mode="edit" data-current-hero></div>
+            <div class="drop">
+              <label>Page image <small>(image, GIF, or a short .mp4/.webm, which autoplays muted and loops)</small>
+                <input type="file" name="hero_image" accept="image/*,video/mp4,video/webm,video/quicktime" />
+              </label>
+            </div>
+            <label class="inline" data-mode="edit" data-remove-hero><input type="checkbox" name="remove_hero" /> Remove the page image (use the thumbnail instead)</label>
+            <label class="inline"><input type="checkbox" name="hero_whole" data-hero-whole /> Show the whole image (no crop; letterboxed to fit)</label>
+            <div class="crop" data-crop data-default-focus="50% 50%" data-file="hero_image" data-key="hero_image" data-frames="Project page (desktop):800x450" hidden>
+              <input type="hidden" name="hero_focus" data-crop-focus /><input type="hidden" name="hero_zoom" data-crop-zoom />
+              <span class="hint">Crop: drag the image to reposition it, and use the slider to zoom. Previews match the site.</span>
+              <div class="crop-frames"></div>
+              <div class="crop-controls">
+                <label class="inline">Zoom <input type="range" min="1" max="3" step="0.05" value="1" data-zoom /></label>
+                <button type="button" class="ghost" data-crop-reset>Reset crop</button>
+              </div>
+            </div>
+            <label>Page image caption <small>(optional)</small><input type="text" name="hero_caption" /></label>
+          </fieldset>
+
+          <div class="row three">
+            <label>Website link <input type="text" name="website" placeholder="https://…" /></label>
+            <label>Code link <input type="text" name="code" placeholder="https://github.com/…" /></label>
+            <label>Video link <input type="text" name="video" placeholder="https://youtu.be/…" /></label>
+          </div>
+
+          <div class="body-editor" data-body-editor>
+            <label for="project-body">Page body <small>(Markdown; defaults to the excerpt. Use the buttons to add videos and images where the cursor is.)</small></label>
+            <div class="toolbar">
+              <button type="button" class="ghost" data-insert-embed>▶ Embed YouTube / Vimeo</button>
+              <button type="button" class="ghost" data-insert-upload>⤒ Upload image / GIF / video</button>
+              <button type="button" class="ghost" data-insert="heading">Heading</button>
+              <button type="button" class="ghost" data-insert="link">Link</button>
+              <input type="file" accept="image/*,video/mp4,video/webm,video/quicktime" data-media-file hidden />
+            </div>
+            <textarea id="project-body" name="body" style="min-height: 260px"></textarea>
+            <div class="result" data-body-result role="status"></div>
+          </div>
+
+          <fieldset>
+            <legend>Research themes <small class="hint">(the project is linked from these tiles)</small></legend>
+            <div class="checks" data-themes></div>
+          </fieldset>
+
+          <details>
+            <summary>More options</summary>
+            <div class="row">
+              <label>Venue <input type="text" name="venue" /></label>
+              <label>Location <input type="text" name="location" value="Seattle, WA" /></label>
+            </div>
+            <div class="row">
+              <label>Supervisor <input type="text" name="supervisor" value="Prof. Jon E. Froehlich" /></label>
+              <label>Tags <small>(comma separated)</small><input type="text" name="tags" /></label>
+            </div>
+          </details>
+
+          <button class="submit" type="submit" data-submit>Add project</button>
+          <div class="result" role="status"></div>
+        </form>
+      </section>
+
+      <!-- ───────────── News ───────────── -->
+      <section class="panel" data-type="news">
+        <div class="list-head"><h2>Existing news</h2></div>
+        <ul class="entries"></ul>
+        <div class="result" data-list-result role="status"></div>
+
+        <form data-endpoint="/admin/api/news" data-body="text" data-noun="news item">
+          <input type="hidden" name="_edit" />
+          <div class="form-head">
+            <h2 data-form-title>New news item</h2>
+            <button type="button" class="ghost" data-mode="edit" data-cancel>Cancel editing</button>
+          </div>
+          <div class="row">
+            <label>Date <input type="date" name="date" required /></label>
+            <label>Link <small>(optional)</small><input type="text" name="link" /></label>
+          </div>
+          <label>Text <small>(Markdown: **bold**, [link text](url))</small><textarea name="text" required></textarea></label>
+          <button class="submit" type="submit" data-submit>Add news</button>
+          <div class="result" role="status"></div>
+        </form>
+      </section>
+
+      <!-- ───────────── Research themes (edit only) ───────────── -->
+      <section class="panel" data-type="themes">
+        <div class="list-head"><h2>Research theme tiles</h2></div>
+        <ul class="entries"></ul>
+        <div class="result" data-list-result role="status"></div>
+
+        <form data-endpoint="/admin/api/theme" data-body="blurb" data-noun="theme" data-edit-only>
+          <input type="hidden" name="_edit" />
+          <div class="form-head">
+            <h2 data-form-title>Pick a theme above to edit it</h2>
+            <button type="button" class="ghost" data-mode="edit" data-cancel>Cancel editing</button>
+          </div>
+          <div class="row">
+            <label>Title <input type="text" name="title" required /></label>
+            <label>Position <small>(1 = leftmost tile)</small><input type="number" name="order" min="1" step="1" required /></label>
+          </div>
+
+          <div class="current" data-current></div>
+          <div class="drop">
+            <label>Replace tile image <small>(drag a file here; shown behind the title, ~4:3 or wider)</small>
+              <input type="file" name="image" accept="image/*" />
+            </label>
+          </div>
+          <div class="crop" data-crop data-default-focus="50% 50%" data-file="image" data-key="image" data-frames="Desktop tile:266x194|Mobile tile:350x150" hidden>
+            <input type="hidden" name="focus" data-crop-focus /><input type="hidden" name="zoom" data-crop-zoom />
+            <span class="hint">Crop: drag the image to reposition it, and use the slider to zoom. Previews match the site.</span>
+            <div class="crop-frames"></div>
+            <div class="crop-controls">
+              <label class="inline">Zoom <input type="range" min="1" max="3" step="0.05" value="1" data-zoom /></label>
+              <button type="button" class="ghost" data-crop-reset>Reset crop</button>
+            </div>
+          </div>
+
+          <label>Blurb <small>(Markdown; shown when the tile is expanded)</small><textarea name="blurb" style="min-height: 140px"></textarea></label>
+
+          <fieldset>
+            <legend>Projects <small class="hint">(linked when the tile is expanded)</small></legend>
+            <div class="checks" data-project-checks></div>
+          </fieldset>
+
+          <button class="submit" type="submit" data-submit>Save changes</button>
+          <div class="result" role="status"></div>
+        </form>
+      </section>
+
+      <!-- ───────────── Home-page intro (one entry: src/content/profile/profile.md) ───────────── -->
+      <section class="panel" data-type="profile">
+        <form data-endpoint="/admin/api/profile" data-body="body" data-noun="intro" data-single="profile">
+          <input type="hidden" name="_edit" />
+          <div class="form-head">
+            <h2 data-form-title>Home-page intro</h2>
+            <button type="button" class="ghost" data-cancel>Discard changes</button>
+          </div>
+          <label>Heading <input type="text" name="heading" required /></label>
+
+          <div class="current" data-current></div>
+          <div class="drop">
+            <label>Replace photo <small>(drag a file here; shown at 256×303, portrait)</small>
+              <input type="file" name="photo" accept="image/*" />
+            </label>
+          </div>
+          <div class="crop" data-crop data-default-focus="50% 50%" data-file="photo" data-key="photo" data-frames="Photo:256x303" hidden>
+            <input type="hidden" name="focus" data-crop-focus /><input type="hidden" name="zoom" data-crop-zoom />
+            <span class="hint">Crop: drag the image to reposition it, and use the slider to zoom. Previews match the site.</span>
+            <div class="crop-frames"></div>
+            <div class="crop-controls">
+              <label class="inline">Zoom <input type="range" min="1" max="3" step="0.05" value="1" data-zoom /></label>
+              <button type="button" class="ghost" data-crop-reset>Reset crop</button>
+            </div>
+          </div>
+          <label>Photo alt text <input type="text" name="photo_alt" /></label>
+
+          <label>Intro text <small>(Markdown: [link text](url); a blank line starts a new paragraph. Links to other sites open in a new tab.)</small>
+            <textarea name="body" required style="min-height: 180px"></textarea>
+          </label>
+
+          <div class="drop">
+            <label>Replace CV <small>(PDF; replaces the current file, so links to it keep working)</small>
+              <input type="file" name="cv" accept="application/pdf" />
+            </label>
+          </div>
+
+          <div class="row">
+            <label>Email <input type="text" name="email" required /></label>
+            <label>LinkedIn link <small>(empty hides it)</small><input type="text" name="linkedin" /></label>
+          </div>
+          <label>Google Scholar link <small>(empty hides it, here and next to the publications)</small><input type="text" name="scholar" /></label>
+
+          <button class="submit" type="submit" data-submit>Save changes</button>
+          <div class="result" role="status"></div>
+        </form>
+      </section>
+    </div>
+
+    <script>
+      const today = new Date().toISOString().slice(0, 10);
+      const slugify = (s) =>
+        s.toLowerCase().replace(/<[^>]+>/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40).replace(/-+$/, "");
+      const stripTags = (s) => String(s ?? "").replace(/<[^>]+>/g, "");
+      const panels = [...document.querySelectorAll(".panel")];
+      const formOf = (type) => document.querySelector(`.panel[data-type="${type}"] form`);
+
+      // Read a response as JSON; if the server sent an error page instead, show it.
+      async function readJson(res) {
+        const text = await res.text();
+        try {
+          return JSON.parse(text);
+        } catch {
+          return { error: `Server error (${res.status}). Check the terminal running npm run dev.\n\n${text.slice(0, 2000)}` };
+        }
+      }
+
+      function showResult(el, kind, html) {
+        el.className = `result ${kind}`;
+        el.innerHTML = html;
+      }
+      const escape = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+      // ── Tabs ──
+      const tabs = document.querySelectorAll("[role=tab]");
+      for (const tab of tabs) {
+        tab.addEventListener("click", () => {
+          for (const t of tabs) t.setAttribute("aria-selected", String(t === tab));
+          for (const p of panels) p.classList.toggle("active", p.dataset.type === tab.dataset.tab);
+        });
+      }
+
+      // ── Theme checkboxes + project dropdown ──
+      async function loadMeta() {
+        const meta = await (await fetch("/admin/api/meta")).json();
+        for (const box of document.querySelectorAll("[data-themes]")) {
+          const checked = new Set([...box.querySelectorAll("input:checked")].map((i) => i.value));
+          box.innerHTML = meta.themes
+            .map((t) => `<label><input type="checkbox" name="themes" value="${t.id}"${checked.has(t.id) ? " checked" : ""}> ${escape(t.title)}</label>`)
+            .join("");
+        }
+        for (const box of document.querySelectorAll("[data-project-checks]")) {
+          const checked = new Set([...box.querySelectorAll("input:checked")].map((i) => i.value));
+          box.innerHTML = meta.projects
+            .map((p) => `<label><input type="checkbox" name="projects" value="${p.id}"${checked.has(p.id) ? " checked" : ""}> ${escape(p.title)}</label>`)
+            .join("");
+        }
+        for (const select of document.querySelectorAll("[data-projects]")) {
+          const value = select.value;
+          select.length = 1;
+          for (const p of meta.projects) select.add(new Option(p.title, p.id));
+          select.value = value;
+        }
+      }
+
+      // ── Lists of existing entries ──
+      async function loadLists() {
+        const lists = await (await fetch("/admin/api/list")).json();
+        for (const panel of panels) {
+          const type = panel.dataset.type;
+          const ul = panel.querySelector(".entries");
+          if (!ul) continue; // single-entry tabs (home intro) have no list
+          const editing = formOf(type).elements._edit.value;
+          ul.innerHTML = "";
+          for (const entry of lists[type]) {
+            const li = document.createElement("li");
+            li.classList.toggle("is-editing", entry.key === editing);
+            li.innerHTML = `<span class="date"></span><span class="title"></span><span class="actions">
+              <button type="button" class="edit">Edit</button><button type="button" class="delete">Delete</button></span>`;
+            li.querySelector(".date").textContent = String(entry.date ?? "").slice(0, 10);
+            const title = li.querySelector(".title");
+            title.textContent = stripTags(entry.title);
+            title.title = stripTags(entry.title);
+            if (entry.note) {
+              const note = document.createElement("span");
+              note.className = "note";
+              note.textContent = entry.note;
+              title.append(note);
+            }
+            li.querySelector(".edit").addEventListener("click", () => startEdit(type, entry.key));
+            if (type === "themes") li.querySelector(".delete").remove();
+            else li.querySelector(".delete").addEventListener("click", () => deleteEntry(type, entry.key, stripTags(entry.title)));
+            ul.append(li);
+          }
+        }
+      }
+
+      // ── New / edit modes ──
+      function resetForm(form) {
+        form.reset();
+        form.elements._edit.value = "";
+        for (const input of form.querySelectorAll("input[type=date]:not([data-no-default])")) input.value = today;
+        for (const el of form.querySelectorAll("[data-touched]")) delete el.dataset.touched;
+        for (const p of form.querySelectorAll(".preview")) p.remove();
+        form.querySelector("[data-current]")?.replaceChildren();
+        form.querySelector("[data-current-hero]")?.replaceChildren();
+        form.querySelector(".result").className = "result";
+        renderEqual(form);
+        for (const crop of form.querySelectorAll("[data-crop]")) {
+          clearCrop(crop);
+          renderCrop(crop, null);
+        }
+        syncHeroWhole(form);
+      }
+
+      function startNew(form) {
+        // Single-entry forms (home intro) are always editing their one file.
+        if (form.dataset.single) return startEdit(form.closest(".panel").dataset.type, form.dataset.single);
+        resetForm(form);
+        form.classList.remove("editing");
+        form.querySelector("[data-form-title]").textContent = form.hasAttribute("data-edit-only")
+          ? `Pick a ${form.dataset.noun} above to edit it`
+          : `New ${form.dataset.noun}`;
+        form.querySelector("[data-submit]").textContent = `Add ${form.dataset.noun}`;
+        if (form.elements.id) form.elements.id.readOnly = false;
+        for (const el of form.querySelectorAll("[data-required-when-new]")) el.required = true;
+        for (const d of form.querySelectorAll("details")) d.open = false;
+        for (const li of form.closest(".panel").querySelectorAll(".entries li")) li.classList.remove("is-editing");
+      }
+
+      async function startEdit(type, key) {
+        const form = formOf(type);
+        const res = await fetch(`/admin/api/entry?type=${type}&key=${encodeURIComponent(key)}`);
+        const entry = await readJson(res);
+        if (entry.error) {
+          showResult(form.closest(".panel").querySelector("[data-list-result]"), "err", escape(entry.error));
+          return;
+        }
+        resetForm(form);
+        form.classList.add("editing");
+        form.elements._edit.value = key;
+        if (!form.dataset.single) {
+          form.querySelector("[data-form-title]").textContent = `Editing: ${stripTags(entry.data.title ?? entry.data.short_title ?? key)}`;
+        }
+        form.querySelector("[data-submit]").textContent = "Save changes";
+        for (const el of form.querySelectorAll("[data-required-when-new]")) el.required = false;
+        for (const d of form.querySelectorAll("details")) d.open = true;
+
+        if (form.elements.id) {
+          form.elements.id.value = key.replace(/^\d{4}-\d{2}-\d{2}-/, "");
+          form.elements.id.readOnly = true;
+          form.elements.id.dataset.touched = "1";
+        }
+        // Clear defaults (e.g. location) so they only show if the entry has them.
+        for (const el of form.querySelectorAll("input[type=text], input[type=month], textarea")) {
+          if (el.name !== "id") el.value = "";
+        }
+
+        for (const [name, value] of Object.entries(entry.data)) {
+          if (name === "themes") continue;
+          const el = form.elements[name];
+          if (!el || el.type === "file" || el instanceof RadioNodeList) continue;
+          if (el.type === "checkbox") el.checked = value === true;
+          else if (el.type === "date") el.value = String(value).slice(0, 10);
+          else if (Array.isArray(value)) el.value = value.join(", ");
+          else el.value = String(value);
+        }
+        // A publication's themes are listed on it; a project's themes list the project.
+        const themeIds = new Set(type === "projects" ? entry.themes ?? [] : entry.data.themes ?? []);
+        for (const box of form.querySelectorAll("[name=themes]")) box.checked = themeIds.has(box.value);
+        const projectIds = new Set(type === "themes" ? entry.data.projects ?? [] : []);
+        for (const box of form.querySelectorAll("[name=projects]")) box.checked = projectIds.has(box.value);
+        form.elements[form.dataset.body].value = entry.body;
+        renderEqual(form);
+        for (const crop of form.querySelectorAll("[data-crop]")) renderCrop(crop, entry.data[crop.dataset.key] ?? null);
+        syncHeroWhole(form);
+        if (form.elements.trophy) form.elements.trophy.dataset.touched = "1";
+
+        // Show the current PDF / thumbnail
+        const current = form.querySelector("[data-current]");
+        if (current) {
+          const parts = [];
+          if (entry.data.image) parts.push(`<img class="wide" src="${escape(entry.data.image)}" alt="">`, `<span>Image: ${escape(entry.data.image)}</span>`);
+          if (entry.data.thumbnail) parts.push(`<img src="${escape(entry.data.thumbnail)}" alt="">`);
+          if (entry.data.thumbnail) parts.push(`<span>Thumbnail: <a href="${escape(entry.data.thumbnail)}" target="_blank">${escape(entry.data.thumbnail)}</a></span>`);
+          if (entry.data.pdf) parts.push(`<span>PDF: <a href="${escape(entry.data.pdf)}" target="_blank">${escape(entry.data.pdf)}</a></span>`);
+          if (entry.data.photo) parts.push(`<img src="${escape(entry.data.photo)}" alt="">`, `<span>Photo: ${escape(entry.data.photo)}</span>`);
+          if (entry.data.cv) parts.push(`<span>CV: <a href="${escape(entry.data.cv)}" target="_blank">${escape(entry.data.cv)}</a></span>`);
+          current.innerHTML = parts.join("");
+        }
+        // A project's own page image (if it has one)
+        const currentHero = form.querySelector("[data-current-hero]");
+        if (currentHero) {
+          const url = entry.data.hero_image;
+          currentHero.innerHTML = !url
+            ? `<span>No page image yet: the page shows the thumbnail.</span>`
+            : /\.(mp4|webm|mov)$/i.test(url)
+              ? `<video src="${escape(url)}" muted loop autoplay playsinline style="max-height: 90px"></video><span>Page image: ${escape(url)}</span>`
+              : `<img src="${escape(url)}" alt=""><span>Page image: ${escape(url)}</span>`;
+          form.querySelector("[data-remove-hero]").hidden = !url;
+        }
+
+        if (form.dataset.single) return;
+        loadLists(); // re-highlights the row being edited
+        form.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      for (const form of document.querySelectorAll("form")) {
+        form.querySelector("[data-cancel]").addEventListener("click", () => startNew(form));
+      }
+
+      // ── Delete ──
+      async function deleteEntry(type, key, title) {
+        const listResult = document.querySelector(`.panel[data-type="${type}"] [data-list-result]`);
+        const body = new FormData();
+        body.set("type", type);
+        body.set("key", key);
+        const plan = await readJson(await fetch("/admin/api/delete", { method: "POST", body }));
+        if (plan.error) return showResult(listResult, "err", escape(plan.error));
+
+        if (!confirm(`Delete “${title}”?\n\nThis will:\n${plan.plan.map((p) => "  • " + p).join("\n")}`)) return;
+
+        body.set("confirm", "yes");
+        const done = await readJson(await fetch("/admin/api/delete", { method: "POST", body }));
+        if (done.error) return showResult(listResult, "err", escape(done.error));
+        showResult(listResult, "ok", escape(`Deleted “${title}”:\n${done.done.map((p) => "  • " + p).join("\n")}`));
+
+        const form = formOf(type);
+        if (form.elements._edit.value === key) startNew(form);
+        loadLists();
+        loadMeta();
+      }
+
+      // ── Image crop editor (focal point + zoom; the original image is never modified) ──
+      // A form can have several editors (a project's thumbnail and page image); each has its own hidden inputs.
+      const cropInputs = (crop) => ({
+        focus: crop.querySelector("[data-crop-focus]"),
+        zoom: crop.querySelector("[data-crop-zoom]"),
+      });
+      const isVideoUrl = (url) => /\.(mp4|webm|mov)$/i.test(url);
+
+      function cropValues(crop) {
+        const { focus, zoom } = cropInputs(crop);
+        const [x, y] = (focus.value || crop.dataset.defaultFocus).split(" ").map(parseFloat);
+        return { x, y, zoom: Number(zoom.value || 1) };
+      }
+
+      function applyCrop(crop) {
+        const { x, y, zoom } = cropValues(crop);
+        for (const box of crop.querySelectorAll(".crop-box")) {
+          box.style.setProperty("--focus", `${x}% ${y}%`);
+          box.style.setProperty("--zoom", zoom);
+        }
+        crop.querySelector("[data-zoom]").value = zoom;
+      }
+
+      function setCrop(crop, x, y, zoom) {
+        const clamp = (v) => Math.min(100, Math.max(0, v));
+        const inputs = cropInputs(crop);
+        inputs.focus.value = `${Math.round(clamp(x))}% ${Math.round(clamp(y))}%`;
+        inputs.zoom.value = zoom;
+        applyCrop(crop);
+      }
+
+      function clearCrop(crop) {
+        const { focus, zoom } = cropInputs(crop);
+        focus.value = "";
+        zoom.value = "";
+      }
+
+      /**
+       * Show the crop editor for an image or video URL (or hide it if there's none).
+       * `video` is needed for freshly chosen files, whose blob: URLs have no extension.
+       */
+      function renderCrop(crop, url, video = url ? isVideoUrl(url) : false) {
+        if (!url?.startsWith("blob:")) crop.dataset.saved = url ?? "";
+        crop.hidden = !url;
+        const frames = crop.querySelector(".crop-frames");
+        frames.replaceChildren();
+        if (!url) return;
+        for (const spec of crop.dataset.frames.split("|")) {
+          const [label, size] = spec.split(":");
+          const [w, h] = size.split("x").map(Number);
+          const frame = document.createElement("div");
+          frame.className = "crop-frame";
+          const box = document.createElement("div");
+          box.className = "crop-box";
+          box.style.width = `${w}px`;
+          box.style.aspectRatio = `${w} / ${h}`;
+          const media = document.createElement(video ? "video" : "img");
+          if (video) Object.assign(media, { muted: true, loop: true, autoplay: true, playsInline: true });
+          else Object.assign(media, { alt: "", draggable: false });
+          media.src = url;
+          media.addEventListener("error", () => (crop.hidden = true)); // e.g. no image uploaded yet
+          box.append(media);
+          const caption = document.createElement("small");
+          caption.className = "hint";
+          caption.textContent = label;
+          frame.append(box, caption);
+          frames.append(frame);
+          enableDrag(crop, box, media);
+        }
+        applyCrop(crop);
+      }
+
+      // Dragging moves the image under the frame, like positioning a photo.
+      function enableDrag(crop, box, media) {
+        box.addEventListener("pointerdown", (e) => {
+          box.setPointerCapture(e.pointerId);
+          box.classList.add("dragging");
+          const start = { px: e.clientX, py: e.clientY, ...cropValues(crop) };
+          const move = (ev) => {
+            const mw = media.naturalWidth ?? media.videoWidth;
+            const mh = media.naturalHeight ?? media.videoHeight;
+            if (!mw) return;
+            const bw = box.clientWidth;
+            const bh = box.clientHeight;
+            const scale = Math.max(bw / mw, bh / mh) * start.zoom;
+            const overX = mw * scale - bw; // how far the image overhangs the frame
+            const overY = mh * scale - bh;
+            const x = overX > 0.5 ? start.x - ((ev.clientX - start.px) / overX) * 100 : start.x;
+            const y = overY > 0.5 ? start.y - ((ev.clientY - start.py) / overY) * 100 : start.y;
+            setCrop(crop, x, y, start.zoom);
+          };
+          const end = () => {
+            box.classList.remove("dragging");
+            box.removeEventListener("pointermove", move);
+            box.removeEventListener("pointerup", end);
+            box.removeEventListener("pointercancel", end);
+          };
+          box.addEventListener("pointermove", move);
+          box.addEventListener("pointerup", end);
+          box.addEventListener("pointercancel", end);
+        });
+      }
+
+      for (const crop of document.querySelectorAll("[data-crop]")) {
+        crop.querySelector("[data-zoom]").addEventListener("input", (e) => {
+          const { x, y } = cropValues(crop);
+          setCrop(crop, x, y, Number(e.target.value));
+        });
+        crop.querySelector("[data-crop-reset]").addEventListener("click", () => {
+          clearCrop(crop);
+          applyCrop(crop);
+        });
+      }
+
+      // "Show the whole image" turns the page-image crop off.
+      function syncHeroWhole(form) {
+        const whole = form.querySelector("[data-hero-whole]");
+        if (whole) form.querySelector('[data-crop][data-key="hero_image"]').classList.toggle("off", whole.checked);
+      }
+      for (const whole of document.querySelectorAll("[data-hero-whole]")) {
+        whole.addEventListener("change", () => syncHeroWhole(whole.form));
+      }
+
+      // ── Equal-authorship checkboxes, kept in sync with the authors text ──
+      const STAR_RE = /\*(\s*<\/b>)?\s*$/; // trailing "*" (also inside a closing </b>)
+      const splitAuthors = (text) => text.split(",").map((a) => a.trim()).filter(Boolean);
+
+      function renderEqual(form) {
+        const box = form.querySelector("[data-equal]");
+        if (!box) return;
+        const authors = splitAuthors(form.elements.authors.value);
+        box.hidden = authors.length < 2;
+        const list = box.querySelector("[data-equal-list]");
+        list.replaceChildren(
+          ...authors.map((author, i) => {
+            const label = document.createElement("label");
+            const check = document.createElement("input");
+            check.type = "checkbox";
+            check.checked = STAR_RE.test(author);
+            check.addEventListener("change", () => toggleEqual(form, i, check.checked));
+            label.append(check, " " + stripTags(author).replace(/\*\s*$/, ""));
+            return label;
+          }),
+        );
+      }
+
+      function toggleEqual(form, index, on) {
+        const authors = splitAuthors(form.elements.authors.value);
+        const author = authors[index].replace(STAR_RE, (_, closing) => closing ?? "");
+        authors[index] = on ? author + "*" : author;
+        form.elements.authors.value = authors.join(", ");
+      }
+
+      {
+        const pubForm = formOf("publications");
+        pubForm.elements.authors.addEventListener("input", () => renderEqual(pubForm));
+      }
+
+      // ── Auto-filled id (new entries only) ──
+      function autoId(form, makeId) {
+        const id = form.elements.id;
+        id.addEventListener("input", () => (id.dataset.touched = "1"));
+        form.addEventListener("input", (e) => {
+          if (e.target !== id && !id.dataset.touched) id.value = makeId(form.elements);
+        });
+      }
+      autoId(formOf("publications"), (el) => {
+        const name = slugify(el.title.value.split(/[:—–]/)[0]).split("-").slice(0, 3).join("-");
+        return [name, slugify(el.venue_short.value)].filter(Boolean).join("-");
+      });
+      autoId(formOf("projects"), (el) => slugify(el.short_title.value));
+
+      // ── Tick the trophy box for real awards (not e.g. Spotlight), unless set by hand ──
+      {
+        const pubForm = formOf("publications");
+        const award = pubForm.elements.award;
+        const trophy = pubForm.elements.trophy;
+        const TROPHY_AWARDS = ["best paper", "honorable mention", "best paper nominee"];
+        trophy.addEventListener("change", () => (trophy.dataset.touched = "1"));
+        award.addEventListener("input", () => {
+          if (!trophy.dataset.touched) trophy.checked = TROPHY_AWARDS.includes(award.value.trim().toLowerCase());
+        });
+      }
+
+      // ── Drag & drop onto the dashed boxes, with image previews ──
+      for (const drop of document.querySelectorAll(".drop")) {
+        const input = drop.querySelector("input[type=file]");
+        drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("over"); });
+        drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+        drop.addEventListener("drop", (e) => {
+          e.preventDefault();
+          drop.classList.remove("over");
+          input.files = e.dataTransfer.files;
+          input.dispatchEvent(new Event("change"));
+        });
+        input.addEventListener("change", () => {
+          drop.querySelector(".preview")?.remove();
+          const file = input.files[0];
+          // A newly chosen image starts with a fresh crop.
+          const form = input.form;
+          const crop = form.querySelector(`[data-crop][data-file="${input.name}"]`);
+          if (crop) {
+            clearCrop(crop);
+            const media = file && (file.type.startsWith("image/") || file.type.startsWith("video/"));
+            if (media) renderCrop(crop, URL.createObjectURL(file), file.type.startsWith("video/"));
+            else renderCrop(crop, crop.dataset.saved || null);
+          }
+          if (file && file.type.startsWith("image/")) {
+            const img = document.createElement("img");
+            img.className = "preview";
+            img.src = URL.createObjectURL(file);
+            drop.append(img);
+          }
+        });
+      }
+
+      // ── Project body editor: insert videos, uploaded media, headings, links at the cursor ──
+      {
+        const form = formOf("projects");
+        const editor = form.querySelector("[data-body-editor]");
+        const body = form.elements.body;
+        const result = editor.querySelector("[data-body-result]");
+        const fileInput = editor.querySelector("[data-media-file]");
+
+        /** Insert text at the cursor. Blocks (HTML, images) get blank lines around them so Markdown treats them as blocks. */
+        function insert(text, { block = true } = {}) {
+          const { selectionStart: a, selectionEnd: b, value } = body;
+          let before = value.slice(0, a);
+          let after = value.slice(b);
+          if (block) {
+            if (before.trim()) before = before.replace(/\s*$/, "\n\n");
+            else before = "";
+            after = after.trim() ? "\n\n" + after.replace(/^\s*/, "") : "\n";
+          }
+          body.value = before + text + after;
+          body.focus();
+          body.selectionStart = body.selectionEnd = before.length + text.length;
+        }
+
+        /** YouTube / Vimeo page link → embeddable player URL (or null). */
+        function embedUrl(link) {
+          if (!URL.canParse(link.trim())) return null;
+          const url = new URL(link.trim());
+          const host = url.hostname.replace(/^www\.|^m\./, "");
+          let m;
+          if (host === "youtu.be") return `https://www.youtube-nocookie.com/embed/${url.pathname.slice(1)}`;
+          if (host === "youtube.com" || host === "youtube-nocookie.com") {
+            if (url.searchParams.get("v")) return `https://www.youtube-nocookie.com/embed/${url.searchParams.get("v")}`;
+            if ((m = url.pathname.match(/^\/(?:embed|shorts|live)\/([\w-]+)/))) return `https://www.youtube-nocookie.com/embed/${m[1]}`;
+          }
+          if (host === "vimeo.com" && (m = url.pathname.match(/^\/(\d+)/))) return `https://player.vimeo.com/video/${m[1]}`;
+          if (host === "player.vimeo.com") return url.href;
+          return null;
+        }
+
+        editor.querySelector("[data-insert-embed]").addEventListener("click", () => {
+          const link = prompt("YouTube or Vimeo link:");
+          if (!link) return;
+          const src = embedUrl(link);
+          if (!src) return showResult(result, "err", escape(`Couldn't read "${link}" as a YouTube or Vimeo link.`));
+          result.className = "result";
+          insert(
+            `<div class="video-embed"><iframe src="${escape(src)}" title="Video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>`,
+          );
+        });
+
+        editor.querySelector("[data-insert-upload]").addEventListener("click", () => {
+          if (!form.elements.id.value) return showResult(result, "err", "Fill in the project's id first: uploads are stored under /images/projects/<id>/.");
+          fileInput.click();
+        });
+        fileInput.addEventListener("change", async () => {
+          const file = fileInput.files[0];
+          fileInput.value = "";
+          if (!file) return;
+          const data = new FormData();
+          data.set("id", form.elements.id.value);
+          data.set("file", file);
+          const res = await readJson(await fetch("/admin/api/media", { method: "POST", body: data }));
+          if (res.error) return showResult(result, "err", escape(res.error));
+
+          const caption = prompt("Caption (optional):") ?? "";
+          const video = /\.(mp4|webm|mov)$/i.test(res.url);
+          const media = video
+            ? `<video src="${escape(res.url)}" controls muted loop playsinline></video>`
+            : caption
+              ? `<img src="${escape(res.url)}" alt="${escape(caption)}">`
+              : `![](${res.url})`;
+          insert(caption ? `<figure>\n  ${media}\n  <figcaption>${escape(caption)}</figcaption>\n</figure>` : media);
+          showResult(result, "ok", escape(`Uploaded ${res.written.join(", ")}. Save the project to keep it in the page.`));
+        });
+
+        editor.querySelector('[data-insert="heading"]').addEventListener("click", () => insert("## Heading"));
+        editor.querySelector('[data-insert="link"]').addEventListener("click", () => {
+          const selected = body.value.slice(body.selectionStart, body.selectionEnd) || "link text";
+          insert(`[${selected}](https://)`, { block: false });
+        });
+      }
+
+      // ── Submit (add or save) ──
+      for (const form of document.querySelectorAll("form")) {
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const button = form.querySelector("[data-submit]");
+          const result = form.querySelector(".result");
+          button.disabled = true;
+          result.className = "result";
+          const body = await readJson(await fetch(form.dataset.endpoint, { method: "POST", body: new FormData(form) }));
+          button.disabled = false;
+          if (body.error) return showResult(result, "err", escape(body.error));
+
+          const editKey = form.elements._edit.value;
+          const message =
+            `Saved! Files written:\n${body.written.map((f) => "  • " + escape(f)).join("\n")}\n\n` +
+            `<a href="${escape(body.view)}" target="_blank">View on the site ↗</a>   ` +
+            `Remember to commit these files when you're happy with them.`;
+          if (editKey) await startEdit(form.closest(".panel").dataset.type, editKey);
+          else startNew(form);
+          showResult(form.querySelector(".result"), "ok", message);
+          loadLists();
+          loadMeta();
+        });
+      }
+
+      for (const form of document.querySelectorAll("form")) startNew(form);
+      loadMeta();
+      loadLists();
+    </script>
+  </body>
+</html>

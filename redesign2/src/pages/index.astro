@@ -1,0 +1,62 @@
+---
+import Base from "../layouts/Base.astro";
+import NewsRail from "../components/NewsRail.astro";
+import Hero from "../components/Hero.astro";
+import ResearchThemes from "../components/ResearchThemes.astro";
+import Publications from "../components/Publications.astro";
+import ProjectGrid from "../components/ProjectGrid.astro";
+---
+
+<Base>
+  <div class="page">
+    <NewsRail />
+    <main data-news-span>
+      <Hero />
+      <ResearchThemes />
+      <Publications />
+      <ProjectGrid />
+    </main>
+  </div>
+</Base>
+
+<style>
+  /* Columns: left margin | main | right margin. The two margins are equal
+     so the main column is centered; the news rail sits in the left margin,
+     which never gets narrower than the rail (on smaller screens the main
+     column shifts right just enough to make room). */
+  .page {
+    --side-pad: clamp(12px, 2.5vw, 48px);
+    display: grid;
+    grid-template-columns:
+      minmax(calc(var(--news-width) + var(--gutter)), 1fr)
+      minmax(0, var(--content-width))
+      minmax(0, 1fr);
+    max-width: 1760px;
+    margin: 0 auto;
+    padding: 0 var(--side-pad);
+  }
+  .page > :global(.news) {
+    grid-column: 1;
+    width: var(--news-width);
+  }
+  main {
+    grid-column: 2;
+    padding-top: 36px;
+  }
+
+  @media (max-width: 960px) {
+    .page {
+      grid-template-columns: minmax(0, 1fr);
+      max-width: calc(var(--content-width) + 32px);
+      padding: 24px 16px 0;
+    }
+    .page > :global(.news),
+    main {
+      grid-column: 1;
+      width: auto;
+    }
+    main {
+      padding-top: 0;
+    }
+  }
+</style>

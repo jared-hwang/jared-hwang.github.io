@@ -1,0 +1,132 @@
+---
+import Icon from "./Icon.astro";
+import PublicationItem from "./PublicationItem.astro";
+import { getProfile, getPublications, groupByYear } from "../lib/content";
+
+const { scholar } = (await getProfile()).data;
+
+const years = groupByYear(await getPublications());
+---
+
+<section id="publications" class="publications" data-mode="selected">
+  <h2 class="section-title">Publications</h2>
+
+  <div class="pub-bar">
+    <div class="pub-toggle" role="group" aria-label="Filter publications">
+      <button type="button" data-filter="selected" aria-pressed="true">Selected Publications</button>
+      <button type="button" data-filter="all" aria-pressed="false">All Publications</button>
+    </div>
+    {
+      scholar && (
+        <a class="scholar" href={scholar} target="_blank" rel="noopener">
+          <Icon name="scholar" size={16} />
+          Google Scholar ↗
+        </a>
+      )
+    }
+  </div>
+
+  {
+    years.map(([year, pubs]) => (
+      <div class="year-group" data-has-selected={pubs.some((p) => p.data.selected) ? "true" : "false"}>
+        <div class="year">{year}</div>
+        <div class="year-pubs">
+          {pubs.map((pub) => (
+            <PublicationItem pub={pub} />
+          ))}
+        </div>
+      </div>
+    ))
+  }
+</section>
+
+<style>
+  .publications {
+    margin-top: 84px;
+  }
+  .pub-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 22px;
+    margin-bottom: 30px;
+  }
+  .pub-toggle {
+    display: flex;
+    gap: 10px;
+  }
+  .scholar {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    text-decoration: none;
+    border-bottom: 1.5px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .scholar:hover {
+    color: var(--ink);
+    border-color: var(--ink);
+  }
+  .pub-toggle button {
+    font: inherit;
+    font-size: 1.05rem;
+    padding: 4px 10px 7px;
+    border: 2px solid var(--accent);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--accent);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .pub-toggle button[aria-pressed="true"] {
+    background: var(--accent);
+    color: #fff;
+  }
+  .pub-toggle button[aria-pressed="false"]:hover {
+    background: var(--accent-soft);
+  }
+
+  .year-group {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    margin-bottom: 44px;
+  }
+  .year {
+    font-size: 1.05rem;
+    padding-top: 2px;
+  }
+  .year-pubs {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+
+  /* "Selected" mode hides unselected papers and years left empty. */
+  .publications[data-mode="selected"] :global(.pub[data-selected="false"]),
+  .publications[data-mode="selected"] .year-group[data-has-selected="false"] {
+    display: none;
+  }
+
+  @media (max-width: 720px) {
+    .year-group {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .year {
+      font-weight: 600;
+    }
+  }
+</style>
+
+<script>
+  const section = document.querySelector<HTMLElement>("#publications")!;
+  const buttons = section.querySelectorAll<HTMLButtonElement>(".pub-toggle button");
+  for (const button of buttons) {
+    button.addEventListener("click", () => {
+      section.dataset.mode = button.dataset.filter;
+      for (const b of buttons) b.setAttribute("aria-pressed", String(b === button));
+    });
+  }
+</script>

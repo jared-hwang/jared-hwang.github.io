@@ -1,0 +1,79 @@
+---
+import { cropStyle, getProjects } from "../lib/content";
+
+const projects = await getProjects();
+---
+
+<section id="projects" class="projects">
+  <h2 class="section-title">Projects</h2>
+  <ul class="grid">
+    {
+      projects.map((p) => (
+        <li>
+          <a class="card" href={`/projects/${p.id}`}>
+            <span class="thumb" style={cropStyle(p.data)}>
+              <img src={p.data.thumbnail} alt={p.data.thumbnail_alt ?? ""} loading="lazy" />
+            </span>
+            <span class="name">{p.data.short_title}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .projects {
+    margin-top: 76px;
+  }
+  .grid {
+    list-style: none;
+    margin: 20px 0 0;
+    padding: 0 0 0 40px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px 26px;
+  }
+  .card {
+    display: block;
+    text-decoration: none;
+  }
+  .thumb {
+    display: block;
+    aspect-ratio: 225 / 148;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #f2f2f2;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  /* --focus / --zoom come from the admin's crop editor. */
+  .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--focus, 50% 50%);
+    transform: scale(var(--zoom, 1));
+    transform-origin: var(--focus, 50% 50%);
+  }
+  .card:hover .thumb {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 22px rgb(0 0 0 / 0.14);
+  }
+  .name {
+    display: block;
+    margin-top: 12px;
+    font-size: 1.15rem;
+  }
+
+  @media (max-width: 720px) {
+    .grid {
+      padding-left: 0;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px 14px;
+    }
+    .name {
+      font-size: 1rem;
+      margin-top: 6px;
+    }
+  }
+</style>
