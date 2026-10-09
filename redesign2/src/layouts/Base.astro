@@ -10,6 +10,8 @@ interface Props {
 
 const { title, description = SITE.description } = Astro.props;
 const { cv } = (await getProfile()).data;
+// Analytics only on the built site, so `npm run dev` and /admin visits aren't counted.
+const analyticsId = import.meta.env.PROD ? SITE.googleAnalytics : undefined;
 const pageTitle = title ? `${title} | ${SITE.title}` : SITE.title;
 ---
 
@@ -28,6 +30,21 @@ const pageTitle = title ? `${title} | ${SITE.title}` : SITE.title;
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Hind+Vadodara:wght@300;400;500;600;700&display=swap"
     />
+    {
+      analyticsId && (
+        <>
+          <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${analyticsId}`}></script>
+          <script is:inline define:vars={{ analyticsId }}>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+              dataLayer.push(arguments);
+            }
+            gtag("js", new Date());
+            gtag("config", analyticsId);
+          </script>
+        </>
+      )
+    }
   </head>
   <body>
     <header class="site-header">
