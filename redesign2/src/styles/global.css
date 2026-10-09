@@ -12,6 +12,8 @@
   --bg: #fff;
   --accent: #0b63ce;    /* the blue publication toggle */
   --accent-soft: #eaf2fd;
+  --banner-bg: #4b6a93;  /* the notice bar at the top (set its text in /admin) */
+  --banner-ink: #fff;
 
   --content-width: 800px;  /* width of the main column */
   --news-width: 200px;     /* width of the left news column */

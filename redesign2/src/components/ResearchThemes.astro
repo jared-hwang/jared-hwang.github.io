@@ -123,6 +123,10 @@ const panels = await Promise.all(
     background: var(--img) var(--focus, 50% 50%) / cover no-repeat;
     transform: scale(var(--zoom, 1));
     transform-origin: var(--focus, 50% 50%);
+    /* Keep the image on its own pre-drawn layer, so the hover zoom doesn't blur
+       mid-animation and then "pop" sharp when the browser redraws it at the end. */
+    will-change: transform;
+    backface-visibility: hidden;
   }
   .tile::after {
     /* Matches the Figma mockup: solid #444 for the top 20% (behind the title),

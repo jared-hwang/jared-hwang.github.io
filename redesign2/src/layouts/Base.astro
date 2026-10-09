@@ -9,7 +9,7 @@ interface Props {
 }
 
 const { title, description = SITE.description } = Astro.props;
-const { cv } = (await getProfile()).data;
+const { cv, banner, banner_link } = (await getProfile()).data;
 // Analytics only on the built site, so `npm run dev` and /admin visits aren't counted.
 const analyticsId = import.meta.env.PROD ? SITE.googleAnalytics : undefined;
 const pageTitle = title ? `${title} | ${SITE.title}` : SITE.title;
@@ -47,6 +47,19 @@ const pageTitle = title ? `${title} | ${SITE.title}` : SITE.title;
     }
   </head>
   <body>
+    {
+      banner && (
+        <div class="banner">
+          {banner_link ? (
+            <a href={banner_link} target={/^https?:/.test(banner_link) ? "_blank" : undefined} rel="noopener">
+              {banner} →
+            </a>
+          ) : (
+            banner
+          )}
+        </div>
+      )
+    }
     <header class="site-header">
       <a class="site-name" href="/">{SITE.title}</a>
       <nav>
@@ -61,6 +74,22 @@ const pageTitle = title ? `${title} | ${SITE.title}` : SITE.title;
 </html>
 
 <style>
+  /* Notice set in /admin (Home Intro tab). Scrolls away; the header below stays sticky. */
+  .banner {
+    padding: 5px 16px 6px;
+    background: var(--banner-bg);
+    color: var(--banner-ink);
+    font-size: 0.88rem;
+    text-align: center;
+  }
+  .banner a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .banner a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
   .site-header {
     position: sticky;
     top: 0;

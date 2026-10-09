@@ -188,6 +188,23 @@ async function pdfThumbnail(pdfBuffer, outFile) {
   return rel(outFile);
 }
 
+/**
+ * Save an uploaded image as a JPEG no larger than `maxPx` on its longest side
+ * (macOS sips), so the site doesn't ship full-resolution camera photos.
+ */
+async function saveDownsampled(file, outFile, maxPx) {
+  const dir = await mkdtemp(path.join(tmpdir(), "admin-img-"));
+  const src = path.join(dir, `upload${extOf(file)}`);
+  await writeFile(src, await bytes(file));
+  const { stdout } = await run("sips", ["-g", "pixelWidth", "-g", "pixelHeight", src]);
+  const longest = Math.max(...[...stdout.matchAll(/pixel(?:Width|Height): (\d+)/g)].map((m) => Number(m[1])));
+  const resize = longest > maxPx ? ["-Z", String(maxPx)] : [];
+  await mkdir(path.dirname(outFile), { recursive: true });
+  await run("sips", ["-s", "format", "jpeg", "-s", "formatOptions", "78", ...resize, src, "--out", outFile]);
+  await rm(dir, { recursive: true });
+  return rel(outFile);
+}
+
 /** Set a theme's `projects:` as a bare list ([a, b]) to match the hand-written theme files. */
 function setProjectList(themeDoc, ids) {
   const index = themeDoc.blocks.findIndex((b) => b.key === "projects");
@@ -516,11 +533,11 @@ async function saveProfile(form) {
   if (crop.error) return crop;
 
   const written = [];
-  // Photos uploaded here live at /images/profile/photo.<ext>, replacing the previous one.
+  // Photos uploaded here are downsized to /images/profile/photo.jpg, replacing the previous one.
   let photoUrl = old.photo;
   if (photo) {
-    photoUrl = `/images/profile/photo${extOf(photo)}`;
-    written.push(await write(publicPath(photoUrl), await bytes(photo)));
+    photoUrl = "/images/profile/photo.jpg";
+    written.push(await saveDownsampled(photo, publicPath(photoUrl), 1500));
     if (old.photo !== photoUrl && old.photo?.startsWith("/images/profile/photo.") && existsSync(publicPath(old.photo))) {
       await unlink(publicPath(old.photo));
       written.push(`(removed old ${rel(publicPath(old.photo))})`);
@@ -539,6 +556,8 @@ async function saveProfile(form) {
   setValue(existing.doc, "email", email);
   setValue(existing.doc, "linkedin", str(form, "linkedin"));
   setValue(existing.doc, "scholar", str(form, "scholar"));
+  setValue(existing.doc, "banner", str(form, "banner"));
+  setValue(existing.doc, "banner_link", str(form, "banner_link"));
   existing.doc.body = str(form, "body");
   written.push(await write(existing.file, serializeDoc(existing.doc)));
   return { ok: true, written, view: "/" };

@@ -11,7 +11,7 @@ const { Content } = await render(profile);
 
 <section class="hero">
   <span class="photo" style={cropStyle(d)}>
-    <img src={d.photo} alt={d.photo_alt ?? ""} width="256" height="303" />
+    <img src={d.photo} alt={d.photo_alt ?? ""} width="256" height="303" fetchpriority="high" />
   </span>
   <div class="intro">
     <h1>{d.heading}</h1>
