@@ -16,6 +16,6 @@ banner_link: "https://jared-hwang.github.io/cv_file/hwang_CV.pdf"
 
 I’m a 3rd year PhD student at the University of Washington [Makeability Lab](https://makeabilitylab.cs.washington.edu/), advised by Prof. [Jon Froehlich](https://jonfroehlich.github.io/).
 
-I work on problems in technical HCI and urban informatics.
+I work on problems in HCI and urban informatics.
 
 Check out my [Research](#research), [Publications](#publications), and [CV](/cv_file/hwang_CV.pdf)!
