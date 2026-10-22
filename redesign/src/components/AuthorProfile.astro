@@ -45,13 +45,16 @@ const socials = [
   </p>
 
   <!-- Mobile: collapsible dropdown (hidden on desktop) -->
-  <details class="socials-details mt-4 md:hidden">
-    <summary
-      class="flex cursor-pointer list-none items-center justify-between rounded-md border border-neutral-200 px-3 py-2.5 text-sm text-neutral-700 transition-colors hover:border-accent-600/50 hover:bg-accent-50 hover:text-accent-700 dark:border-neutral-800 dark:text-neutral-300 dark:hover:border-accent-400/40 dark:hover:bg-accent-950/40 dark:hover:text-accent-300"
+  <div class="socials-collapsible mt-4 md:hidden" data-expanded="false">
+    <button
+      type="button"
+      class="socials-toggle flex w-full cursor-pointer items-center justify-between rounded-md border border-neutral-200 px-3 py-2.5 text-sm text-neutral-700 transition-colors hover:border-accent-600/50 hover:bg-accent-50 hover:text-accent-700 dark:border-neutral-800 dark:text-neutral-300 dark:hover:border-accent-400/40 dark:hover:bg-accent-950/40 dark:hover:text-accent-300"
+      aria-expanded="false"
+      aria-controls="socials-panel"
     >
       <span class="font-medium">Socials</span>
       <svg
-        class="h-4 w-4 transition-transform"
+        class="socials-chevron h-4 w-4 transition-transform"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -62,11 +65,15 @@ const socials = [
       >
         <polyline points="6 9 12 15 18 9"></polyline>
       </svg>
-    </summary>
-    <ul class="author-socials mt-2 space-y-1.5 text-sm">
-      {socials.map((s) => <SocialLink s={s} />)}
-    </ul>
-  </details>
+    </button>
+    <div class="socials-panel" id="socials-panel">
+      <div>
+        <ul class="author-socials mt-2 space-y-1.5 text-sm">
+          {socials.map((s) => <SocialLink s={s} />)}
+        </ul>
+      </div>
+    </div>
+  </div>
 
   <!-- Desktop: always-visible list (hidden on mobile) -->
   <ul class="author-socials mt-4 hidden space-y-1.5 text-sm md:block">
@@ -75,8 +82,30 @@ const socials = [
 </aside>
 
 <style>
-  /* Hide the default disclosure triangle on <summary> */
-  .socials-details > summary::-webkit-details-marker { display: none; }
-  /* Rotate the chevron when <details> is open */
-  .socials-details[open] > summary > svg { transform: rotate(180deg); }
+  .socials-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .socials-panel > div {
+    overflow: hidden;
+  }
+  .socials-collapsible[data-expanded="true"] .socials-panel {
+    grid-template-rows: 1fr;
+  }
+  .socials-collapsible[data-expanded="true"] .socials-chevron {
+    transform: rotate(180deg);
+  }
 </style>
+
+<script>
+  document.querySelectorAll<HTMLElement>(".socials-collapsible").forEach((el) => {
+    const btn = el.querySelector<HTMLButtonElement>(".socials-toggle");
+    if (!btn) return;
+    btn.addEventListener("click", () => {
+      const open = el.dataset.expanded === "true";
+      el.dataset.expanded = open ? "false" : "true";
+      btn.setAttribute("aria-expanded", open ? "false" : "true");
+    });
+  });
+</script>

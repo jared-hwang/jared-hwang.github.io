@@ -41,11 +41,11 @@ const containerW = wide ? "max-w-6xl" : "max-w-3xl";
       class="border-b border-neutral-200 dark:border-neutral-800"
     >
       <div
-        class:list={["mx-auto flex items-center justify-between px-6 py-5", containerW]}
+        class="mx-auto flex items-center justify-between px-6 py-5 max-w-6xl"
       >
-        <a href="/" class="font-semibold tracking-tight">{SITE.title}</a>
+        <a href="/" class="text-xl font-semibold tracking-tight">{SITE.title}</a>
         <div class="flex items-center gap-5">
-          <nav class="flex gap-6 text-sm">
+          <nav class="flex gap-6 text-lg">
             {
               SITE.nav.map((item) => (
                 <a href={item.href} class="hover:underline">

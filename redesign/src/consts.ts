@@ -15,8 +15,8 @@ export const SITE = {
       "https://scholar.google.com/citations?user=yZ1_ynQAAAAJ&hl=en&oi=ao",
   },
   nav: [
-    { label: "Home", href: "/" },
     { label: "Research", href: "/research" },
     { label: "Publications", href: "/publications" },
+    { label: "CV", href: "/cv_file/hwang_CV.pdf" },
   ],
 };
