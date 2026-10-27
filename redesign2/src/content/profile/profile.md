@@ -14,7 +14,7 @@ banner: "Looking for summer 2027 internships!"
 banner_link: "https://jared-hwang.github.io/cv_file/hwang_CV.pdf"
 ---
 
-I’m a 3rd year PhD student at the University of Washington [Makeability Lab](https://makeabilitylab.cs.washington.edu/), advised by Prof. [Jon Froehlich](https://jonfroehlich.github.io/). 
+I’m a 3rd year PhD student in Computer Science at the University of Washington [Makeability Lab](https://makeabilitylab.cs.washington.edu/), advised by Prof. [Jon Froehlich](https://jonfroehlich.github.io/). 
 
 I explore **computer vision** and **HCI** to train, evaluate, and build systems and models that operate on large-scale **multimodal** streetscape data, enabling more interactive and personalized ways to understand our cities.
 
