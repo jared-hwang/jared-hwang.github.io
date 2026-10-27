@@ -11,12 +11,14 @@ const pad2 = (n: number) => String(n).padStart(2, "0");
 ---
 
 <!--
-  Desktop: a vertical timeline the height of the page. Each item is placed by
-  date — newest at the top, oldest near the bottom (see the script below).
+  Desktop: a vertical timeline in a window that runs from the top of the hero
+  photo to the Research Themes heading; the items scroll inside it. Items are
+  spaced by date, with long gaps compressed (see the script below).
   Mobile: a plain list showing the latest few, with a button for the rest.
 -->
 <aside class="news" aria-labelledby="news-heading">
   <h2 id="news-heading" class="news-heading">News!</h2>
+  <div class="news-scroll">
   <ol class="news-track">
     {
       items.map(({ entry, Content }) => (
@@ -32,10 +34,23 @@ const pad2 = (n: number) => String(n).padStart(2, "0");
       ))
     }
   </ol>
+  </div>
+  <button type="button" class="news-older" aria-hidden="true" tabindex="-1">Older news ↓</button>
   {items.length > 3 && <button type="button" class="news-more">Show older news</button>}
 </aside>
 
 <style>
+  /* Registered so the edge fades can transition. */
+  @property --fade-top {
+    syntax: "<length>";
+    inherits: false;
+    initial-value: 0px;
+  }
+  @property --fade-bottom {
+    syntax: "<length>";
+    inherits: false;
+    initial-value: 0px;
+  }
   .news {
     --line-x: 46px; /* where the vertical line sits */
     position: relative;
@@ -71,7 +86,71 @@ const pad2 = (n: number) => String(n).padStart(2, "0");
     line-height: 1.5;
     color: var(--ink-soft);
   }
-  /* Laid out by the script on wide screens. */
+  /* Laid out by the script on wide screens: the rail's top and height are set
+     inline, and the track scrolls inside .news-scroll. */
+  .news.is-positioned {
+    display: flex;
+    flex-direction: column;
+    align-self: start;
+    box-sizing: border-box;
+  }
+  .news.is-positioned::before {
+    top: calc(var(--rail-top, 0px) + 4px);
+  }
+  .news.is-positioned .news-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    /* Fade an edge only while there's more to scroll that way (classes set by the script). */
+    --fade-top: 0px;
+    --fade-bottom: 0px;
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      #000 var(--fade-top),
+      #000 calc(100% - var(--fade-bottom)),
+      transparent
+    );
+    transition: --fade-top 0.2s, --fade-bottom 0.2s;
+  }
+  .news.can-scroll-up .news-scroll {
+    --fade-top: 36px;
+  }
+  .news.can-scroll-down .news-scroll {
+    --fade-bottom: 56px;
+  }
+  /* Scrolls the rail down; only shown while there are older items below. Hidden with
+     visibility, not display, so the scroll window's height doesn't change. */
+  .news-older {
+    display: none;
+  }
+  .news.is-positioned .news-older {
+    display: block;
+    visibility: hidden;
+    flex: none;
+    align-self: flex-start;
+    margin: 6px 0 0 calc(var(--line-x) + 8px);
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, visibility 0.2s;
+  }
+  .news.is-positioned.can-scroll-down .news-older {
+    visibility: visible;
+    opacity: 1;
+  }
+  .news-older:hover {
+    color: var(--ink);
+  }
   .news.is-positioned .news-item {
     position: absolute;
     left: 0;
@@ -144,45 +223,73 @@ const pad2 = (n: number) => String(n).padStart(2, "0");
 
 <script>
   const news = document.querySelector<HTMLElement>(".news")!;
+  const scroller = news.querySelector<HTMLElement>(".news-scroll")!;
   const track = news.querySelector<HTMLElement>(".news-track")!;
+  const older = news.querySelector<HTMLButtonElement>(".news-older")!;
   const items = [...track.querySelectorAll<HTMLElement>(".news-item")];
   const main = document.querySelector<HTMLElement>("[data-news-span]")!;
+  const photo = main.querySelector<HTMLElement>(".hero .photo")!;
+  const themesTitle = main.querySelector<HTMLElement>("#research .section-title")!;
   const wide = window.matchMedia("(min-width: 961px)");
 
-  const TOP_GAP = 60; // space above the newest item
-  const BOTTOM_GAP = 140; // the oldest item sits this far up from the bottom
+  const TOP_GAP = 24; // space above the newest item
+  const BOTTOM_GAP = 36; // space below the oldest item, so it clears the fade
   const MIN_SPACING = 18; // minimum vertical space between items
+  const PX_PER_DAY = 1; // vertical distance per day between item tops...
+  const MAX_STEP = 140; // ...capped, so long quiet stretches don't leave huge gaps
+  const DAY = 24 * 60 * 60 * 1000;
 
   function layout() {
     if (!wide.matches) {
       news.classList.remove("is-positioned");
+      news.style.paddingTop = news.style.height = "";
+      news.style.removeProperty("--rail-top");
       track.style.height = "";
+      updateScrollCues();
       return;
     }
     news.classList.add("is-positioned");
 
-    // Height of the page content, ignoring any expanded research theme, so
-    // items don't move when a theme opens.
-    let expanded = 0;
-    for (const panel of main.querySelectorAll<HTMLElement>(".theme-panel")) expanded += panel.offsetHeight;
-    const height = main.getBoundingClientRect().bottom - track.getBoundingClientRect().top - expanded;
-    track.style.height = `${height}px`;
+    // The rail spans from the top of the photo to the Research Themes heading.
+    const origin = news.getBoundingClientRect().top;
+    const railTop = photo.getBoundingClientRect().top - origin;
+    news.style.paddingTop = `${railTop}px`;
+    news.style.setProperty("--rail-top", `${railTop}px`);
+    news.style.height = `${themesTitle.getBoundingClientRect().top - origin}px`;
 
-    const times = items.map((el) => Number(el.dataset.time));
-    const newest = Math.max(...times);
-    const oldest = Math.min(...times);
-    const span = newest - oldest || 1;
-    const usable = Math.max(height - TOP_GAP - BOTTOM_GAP, 0);
-
-    // Place by date, then push down anything that would overlap the item above.
+    // Space items by date, then push down anything that would overlap the item above.
+    let prevTop = 0;
     let prevBottom = -Infinity;
-    for (const el of items) {
-      const ideal = TOP_GAP + ((newest - Number(el.dataset.time)) / span) * usable;
+    let prevTime = 0;
+    for (const [i, el] of items.entries()) {
+      const time = Number(el.dataset.time);
+      const ideal = i === 0 ? TOP_GAP : prevTop + Math.min(((prevTime - time) / DAY) * PX_PER_DAY, MAX_STEP);
       const top = Math.max(ideal, prevBottom + MIN_SPACING);
       el.style.top = `${top}px`;
+      prevTop = top;
       prevBottom = top + el.offsetHeight;
+      prevTime = time;
     }
+    track.style.height = `${prevBottom + BOTTOM_GAP}px`;
+    updateScrollCues();
   }
+
+  // Marks which directions the rail can scroll, for the edge fades and the "Older news" link.
+  function updateScrollCues() {
+    const on = news.classList.contains("is-positioned");
+    const up = on && scroller.scrollTop > 1;
+    const down = on && scroller.scrollTop + scroller.clientHeight < scroller.scrollHeight - 1;
+    news.classList.toggle("can-scroll-up", up);
+    news.classList.toggle("can-scroll-down", down);
+    older.setAttribute("aria-hidden", String(!down));
+    older.tabIndex = down ? 0 : -1;
+  }
+
+  scroller.addEventListener("scroll", updateScrollCues, { passive: true });
+  older.addEventListener("click", () => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    scroller.scrollBy({ top: scroller.clientHeight * 0.75, behavior: reduce ? "auto" : "smooth" });
+  });
 
   new ResizeObserver(layout).observe(main);
   wide.addEventListener("change", layout);

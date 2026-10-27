@@ -20,31 +20,35 @@ import ProjectGrid from "../components/ProjectGrid.astro";
 </Base>
 
 <style>
-  /* Columns: left margin | main | right margin. The two margins are equal
-     so the main column is centered; the news rail sits in the left margin,
-     which never gets narrower than the rail (on smaller screens the main
-     column shifts right just enough to make room). */
+  /* Columns: left margin | main | right margin. The left margin is a bit
+     narrower than the right, nudging main left to balance the news rail. The
+     rail sits in the right margin, which never gets narrower than the rail (on
+     smaller screens main shifts further left just enough to make room). */
   .page {
     --side-pad: clamp(12px, 2.5vw, 48px);
     display: grid;
     grid-template-columns:
-      minmax(calc(var(--news-width) + var(--gutter)), 1fr)
+      minmax(0, 0.8fr)
       minmax(0, var(--content-width))
-      minmax(0, 1fr);
+      minmax(calc(var(--news-width) + var(--gutter)), 1fr);
     max-width: 1760px;
     margin: 0 auto;
     padding: 0 var(--side-pad);
   }
+  /* Centered in the right margin, keeping a gutter between it and main. Both are
+     pinned to row 1, since the rail comes first in the markup. */
   .page > :global(.news) {
-    grid-column: 1;
+    grid-column: 3;
+    grid-row: 1;
     width: var(--news-width);
+    justify-self: center;
+    margin-left: var(--gutter);
   }
   main {
     grid-column: 2;
+    grid-row: 1;
     padding-top: 36px;
-    /* Only as tall as its content. Stretched to the row, it would match the news
-       rail's height, which is itself sized from main, so the rail could never
-       shrink back (e.g. after going from "All" to "Selected" publications). */
+    /* Only as tall as its content, not stretched to the row. */
     align-self: start;
   }
 
@@ -57,7 +61,12 @@ import ProjectGrid from "../components/ProjectGrid.astro";
     .page > :global(.news),
     main {
       grid-column: 1;
+      grid-row: auto;
       width: auto;
+    }
+    .page > :global(.news) {
+      justify-self: stretch;
+      margin-left: 0;
     }
     main {
       padding-top: 0;

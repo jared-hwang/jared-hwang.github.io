@@ -10,22 +10,33 @@ const { Content } = await render(profile);
 ---
 
 <section class="hero">
-  <span class="photo" style={cropStyle(d)}>
-    <img src={d.photo} alt={d.photo_alt ?? ""} width="256" height="303" fetchpriority="high" />
-  </span>
+  <div class="side">
+    <span class="photo" style={cropStyle(d)}>
+      <img src={d.photo} alt={d.photo_alt ?? ""} width="256" height="303" fetchpriority="high" />
+    </span>
+    <ul class="socials">
+      <li><a href={`mailto:${d.email}`}><Icon name="email" />Email</a></li>
+      {d.linkedin && <li><a href={d.linkedin} target="_blank" rel="noopener"><Icon name="linkedin" />LinkedIn</a></li>}
+      {d.scholar && <li><a href={d.scholar} target="_blank" rel="noopener"><Icon name="scholar" />Google Scholar</a></li>}
+    </ul>
+    <div class="actions">
+      <a class="btn cv" href={d.cv} target="_blank" rel="noopener">CV</a>
+      {
+        d.banner &&
+          (d.banner_link ? (
+            <a class="btn notice" href={d.banner_link} target={/^https?:/.test(d.banner_link) ? "_blank" : undefined} rel="noopener">
+              {d.banner}
+            </a>
+          ) : (
+            <span class="btn notice">{d.banner}</span>
+          ))
+      }
+    </div>
+  </div>
   <div class="intro">
     <h1>{d.heading}</h1>
     <div class="intro-text">
       <Content />
-
-      <div class="actions">
-        <a class="btn cv" href={d.cv} target="_blank" rel="noopener">CV</a>
-        <ul class="socials">
-          <li><a href={`mailto:${d.email}`}><Icon name="email" />Email</a></li>
-          {d.linkedin && <li><a href={d.linkedin} target="_blank" rel="noopener"><Icon name="linkedin" />LinkedIn</a></li>}
-          {d.scholar && <li><a href={d.scholar} target="_blank" rel="noopener"><Icon name="scholar" />Google Scholar</a></li>}
-        </ul>
-      </div>
     </div>
   </div>
 </section>
@@ -35,6 +46,14 @@ const { Content } = await render(profile);
     display: grid;
     grid-template-columns: 256px 1fr;
     gap: 26px;
+  }
+  /* Photo, then socials, then the CV button with the notice beside it. Starts a bit
+     lower so the photo's top sits ~half an em above the "I'm Jared!" text. */
+  .side {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 19px;
   }
   /* Clips the zoomed photo. --focus / --zoom come from the admin's crop editor. */
   .photo {
@@ -69,27 +88,48 @@ const { Content } = await render(profile);
   }
   .actions {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 22px;
+    align-items: stretch;
+    gap: 12px;
   }
   .cv {
     border-width: 2.5px;
     font-size: 1.15rem;
     padding: 3px 28px 7px;
   }
+  /* "Looking for internships" notice, set in /admin (Home Intro tab). */
+  /* Sized to its text, shrinking (and wrapping) to fit beside the CV button. */
+  .notice {
+    flex: 0 1 auto;
+    border: 2.5px solid var(--banner-bg);
+    background: var(--banner-bg);
+    color: var(--banner-ink);
+    font-size: 0.9rem;
+    line-height: 1.25;
+    font-weight: 600;
+    text-align: center;
+    padding: 4px 10px 6px;
+  }
+  .notice:is(a):hover {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--bg);
+  }
+  span.notice {
+    cursor: default;
+  }
   .socials {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
-    flex-wrap: wrap;
-    gap: 18px;
+    justify-content: space-between;
+    width: 256px;
+    margin-top: -4px;
   }
   .socials a {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
+    gap: 6px;
     font-size: 0.82rem;
     text-decoration: none;
     color: var(--ink-soft);
@@ -110,6 +150,15 @@ const { Content } = await render(profile);
     }
     .intro-text {
       padding-left: 0;
+    }
+    .side {
+      margin-top: 0;
+    }
+    .socials {
+      width: auto;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: 18px;
     }
   }
 </style>

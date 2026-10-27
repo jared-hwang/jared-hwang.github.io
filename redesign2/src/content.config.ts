@@ -94,7 +94,7 @@ const profile = defineCollection({
     email: z.string(),
     linkedin: z.string().optional(),
     scholar: z.string().optional(),
-    banner: z.string().optional(), // thin notice at the top of every page, e.g. "Looking for internships"; empty hides it
+    banner: z.string().optional(), // notice next to the CV button on the home page, e.g. "Looking for internships"; empty hides it
     banner_link: z.string().optional(), // makes the banner a link
   }),
 });

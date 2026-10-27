@@ -12,7 +12,7 @@
   --bg: #fff;
   --accent: #0b63ce;    /* the blue publication toggle */
   --accent-soft: #eaf2fd;
-  --banner-bg: #3b84e4;  /* the notice bar at the top (set its text in /admin) */
+  --banner-bg: #3b84e4;  /* the notice next to the CV button (set its text in /admin) */
   --banner-ink: #ffffff;
 
   --content-width: 800px;  /* width of the main column */
