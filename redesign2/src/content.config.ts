@@ -65,7 +65,8 @@ const publications = defineCollection({
     video: z.string().optional(),
     slides: z.string().optional(),
     award: z.string().optional(), // text label shown next to the venue
-    trophy: z.boolean().default(false), // show the 🏆 badge on the thumbnail
+    trophy: z.boolean().default(false), // show the award badge on the thumbnail
+    trophy_emoji: z.string().optional(), // emoji for that badge (default 🏆)
     acceptance_rate: z.string().optional(),
     research_project: reference("projects").optional(),
     themes: z.array(reference("themes")).default([]),

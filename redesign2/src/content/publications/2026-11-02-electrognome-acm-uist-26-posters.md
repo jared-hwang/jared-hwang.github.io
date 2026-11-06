@@ -6,6 +6,9 @@ venue_short: "ACM UIST 26 (Posters)"
 authors: "Cynthia Dong, Andy Ye, <b>Jared Hwang</b>, Zachary Englhardt, Jerry Cao, Juyoung Lee, Shwetak N. Patel, Richard Li"
 pdf: "/files/electrognome-acm-uist-26-posters.pdf"
 thumbnail: "/images/publications/electrognome-acm-uist-26-posters.jpg"
+award: "Honorable Mention"
+trophy: true
+trophy_emoji: "🏅"
 ---
 
 

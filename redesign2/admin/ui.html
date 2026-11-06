@@ -261,7 +261,18 @@
               <option value="Spotlight"></option>
             </datalist>
           </label>
-          <label class="inline"><input type="checkbox" name="trophy" /> Show 🏆 on the thumbnail</label>
+          <label class="inline"><input type="checkbox" name="trophy" /> Show a badge on the thumbnail</label>
+          <label>Badge emoji <small>(optional; defaults to 🏆)</small>
+            <input type="text" name="trophy_emoji" placeholder="🏆" list="trophy-emoji-options" style="max-width: 8em" />
+            <datalist id="trophy-emoji-options">
+              <option value="🏆"></option>
+              <option value="🏅"></option>
+              <option value="🥇"></option>
+              <option value="🎖️"></option>
+              <option value="⭐"></option>
+              <option value="✨"></option>
+            </datalist>
+          </label>
 
           <fieldset>
             <legend>Research themes</legend>

@@ -12,6 +12,7 @@ award: "Honorable Mention"
 trophy: true
 themes: ["city-scale-urban-analysis", "person-level-urban-interaction"]
 research_project: "artscape"
+trophy_emoji: "🏅"
 ---
 
 

@@ -20,7 +20,7 @@ const equalAuthors = d.authors?.includes("*");
         <span class="pub-thumb-crop" style={cropStyle(d)}>
           <img src={d.thumbnail} alt="" loading="lazy" />
         </span>
-        {d.trophy && <span class="trophy" title={d.award}>🏆</span>}
+        {d.trophy && <span class="trophy" title={d.award}>{d.trophy_emoji || "🏆"}</span>}
       </a>
     )
   }

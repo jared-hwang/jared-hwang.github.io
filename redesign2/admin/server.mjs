@@ -322,6 +322,7 @@ async function savePublication(form) {
     arxiv: str(form, "arxiv"),
     award: str(form, "award"),
     trophy: form.get("trophy") === "on",
+    trophy_emoji: str(form, "trophy_emoji"),
     research_project: str(form, "research_project"),
     themes: form.getAll("themes").map(String),
   };
